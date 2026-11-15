@@ -30,6 +30,7 @@ card_picture() { # card_picture card
     weekly) picture weekly "$WIDTH" "Weekly rhythm" ;;
     streaks) picture streaks "$WIDTH" "Streaks" ;;
     about) picture about "$WIDTH" "About" ;;
+    repos) picture repos "$WIDTH" "Top repos" ;;
   esac
 }
 block="$(mktemp)"

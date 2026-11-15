@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { compute } from '../src/compute.ts';
-import { COLORS, DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.ts';
+import { CARDS, COLORS, DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.ts';
 import { cellsPath, dotsPath, look, path, ringCells, type Style } from '../src/display/dmd.ts';
 import { textCells, textWidth } from '../src/display/font.ts';
 import { rasterize } from '../src/display/raster.ts';
@@ -205,7 +205,7 @@ describe('oled cards', () => {
   });
 
   it('is shown at 400 wide so two fit a row', () => {
-    expect(Object.values(cardWidths({ ...DEFAULT_CONFIG, look: { ...DEFAULT_CONFIG.look, style: 'oled' } }))).toEqual([400, 400, 400, 400, 400, 400]);
+    expect(Object.values(cardWidths({ ...DEFAULT_CONFIG, look: { ...DEFAULT_CONFIG.look, style: 'oled' } }))).toEqual(CARDS.map(() => 400));
   });
 });
 

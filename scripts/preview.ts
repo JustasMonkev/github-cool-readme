@@ -18,7 +18,8 @@ rmSync('out/preview', { recursive: true, force: true });
 const sections: string[] = [];
 for (const file of looks) {
   const name = file.replace(/\.yml$/, '');
-  const config = loadConfig(`preview/${file}`);
+  // Every card, whatever the look's file says: a new card is in the preview without listing it.
+  const config = { ...loadConfig(`preview/${file}`), show: [...CARDS] };
   const files = renderAll(compute(snapshot, config), config);
   mkdirSync(`out/preview/${name}`, { recursive: true });
   for (const [path, svg] of Object.entries(files)) writeFileSync(`out/preview/${name}/${path}`, svg);
