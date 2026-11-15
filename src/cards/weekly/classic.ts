@@ -1,6 +1,6 @@
-import type { Config } from '../config.ts';
-import { DAY_NAMES, weekdayFacts, type WeekdayItem } from '../compute.ts';
-import { CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, WIDTH, card, esc, fadeIn, formatNumber, headerText, truncate, type Theme } from './svg.ts';
+import type { Config } from '../../config.ts';
+import { DAY_NAMES, weekdayFacts, type WeekdayItem } from '../../compute.ts';
+import { CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, WIDTH, card, esc, fadeIn, formatNumber, headerText, truncate, type Theme } from '../../render/svg.ts';
 
 // The bars on the left, three numbers about them on the right, one under the other.
 const BASELINE = 166;

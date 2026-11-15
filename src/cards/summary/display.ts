@@ -1,11 +1,11 @@
 // Summary as a pinball-style display: the activity ring stays on, the stats take turns.
 
 import { createRequire } from 'node:module';
-import type { SummaryModel } from '../compute.ts';
-import { textCells, textWidth } from './font.ts';
-import { H, PITCH, TITLE_ROW, W, drawDots, frame, path, ringCells, type Look, type Style } from './dmd.ts';
-import { rasterize } from './raster.ts';
-import { slideshow, type Item } from './slides.ts';
+import type { SummaryModel } from '../../compute.ts';
+import { textCells, textWidth } from '../../display/font.ts';
+import { H, PITCH, TITLE_ROW, W, drawDots, frame, path, ringCells, type Style } from '../../display/dmd.ts';
+import { rasterize } from '../../display/raster.ts';
+import { slideshow, type Item } from '../../display/slides.ts';
 
 const require = createRequire(import.meta.url);
 const octicons = require('@primer/octicons/build/data.json') as Record<string, { heights: Record<string, { path: string }> }>;

@@ -1,14 +1,16 @@
 import { readFileSync } from 'node:fs';
 import { parseDocument } from 'yaml';
+import { CARD_DEFS, type CardDefs, type CardSettings } from './cards/index.ts';
 import { fromOld, markOld, oldKeys } from './legacy.ts';
 import { ConfigError, background, check, emptyMappings, isMap, type Raw, type Shape } from './shape.ts';
 
 export { ConfigError };
 
-export const CARDS = ['summary', 'languages', 'contributions', 'weekly', 'streaks', 'about'] as const;
-export type Card = (typeof CARDS)[number];
+/** The cards, in their usual order: see cards/index.ts. */
+export type Card = CardDefs['name'];
+export const CARDS: readonly Card[] = CARD_DEFS.map((c) => c.name);
 /** The cards made when the settings don't list any; the others are there to turn on. */
-export const DEFAULT_CARDS: Card[] = ['summary', 'languages', 'contributions', 'weekly'];
+export const DEFAULT_CARDS: Card[] = CARD_DEFS.filter((c) => c.on).map((c) => c.name);
 
 export const STYLES = ['classic', 'oled', 'dotmatrix'] as const;
 export type Style = (typeof STYLES)[number];
@@ -42,45 +44,8 @@ export interface Config {
     /** classic only: a thin outline. */
     border: boolean;
   };
-  cards: {
-    summary: {
-      /** Shown small and uppercase on the card's header line; null for none. */
-      title: string | null;
-      /** What sits inside the activity ring: the percentage, or the GitHub logo (the percentage moves to the header). */
-      ring: 'percent' | 'github';
-    };
-    languages: {
-      title: string | null;
-      count: number;
-      /** Languages left out: their share is dropped. */
-      hide: string[];
-      /** Weight per repo; 1 is neutral, 0 leaves it out. */
-      repos: Record<string, number>;
-      /** Fold the remaining languages into an "Other" entry. */
-      other: boolean;
-    };
-    contributions: {
-      title: string | null;
-      /** How many repos to show; 3 are in view at a time, the rest scroll past in a loop. */
-      count: number;
-      /** Count open pull requests too, not only merged ones. */
-      open: boolean;
-      /** Shown before the others, if they have a merged (or open) pull request of yours. */
-      pin: string[];
-      hide: string[];
-    };
-    weekly: { title: string | null };
-    streaks: { title: string | null };
-    about: {
-      title: string | null;
-      /** Shown large; null for none. */
-      headline: string | null;
-      /** Each is one line of text: they are not wrapped. More than fit scroll past, like the contributions. */
-      lines: string[];
-      /** Label -> text, one per line under the lines, scrolling with them. */
-      facts: Record<string, string>;
-    };
-  };
+  /** Each card's settings: see the card's folder in cards/. */
+  cards: CardSettings;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -88,14 +53,7 @@ export const DEFAULT_CONFIG: Config = {
   show: [...DEFAULT_CARDS],
   count: { private: true, orgs: true },
   look: { style: 'classic', color: 'github', animations: true, background: 'none', border: false },
-  cards: {
-    summary: { title: null, ring: 'percent' },
-    languages: { title: 'Most used languages', count: 6, hide: [], repos: {}, other: true },
-    contributions: { title: 'Notable contributions', count: 6, open: true, pin: [], hide: [] },
-    weekly: { title: 'Weekly rhythm' },
-    streaks: { title: 'Streaks' },
-    about: { title: 'About', headline: null, lines: [], facts: {} },
-  },
+  cards: Object.fromEntries(CARD_DEFS.map((c) => [c.name, c.settings])) as CardSettings,
 };
 
 const SHAPE: Shape = {
@@ -103,15 +61,11 @@ const SHAPE: Shape = {
   show: 'string[]',
   count: { private: 'boolean', orgs: 'boolean' },
   look: { style: 'string', color: 'string', animations: 'boolean', background: 'string', border: 'boolean' },
-  cards: {
-    summary: { title: 'string?', ring: 'string' },
-    languages: { title: 'string?', count: 'number', hide: 'string[]', repos: 'weights', other: 'boolean' },
-    contributions: { title: 'string?', count: 'number', open: 'boolean', pin: 'string[]', hide: 'string[]' },
-    weekly: { title: 'string?' },
-    streaks: { title: 'string?' },
-    about: { title: 'string?', headline: 'string?', lines: 'string[]', facts: 'strings' },
-  },
+  cards: Object.fromEntries(CARD_DEFS.map((c) => [c.name, c.shape])),
 };
+
+/** Settings that are a mapping of their own (repo weights, facts): one in the file replaces the default, not added to it. */
+const WHOLE = new Set(CARD_DEFS.flatMap((c) => Object.entries(c.shape).filter(([, t]) => t === 'weights' || t === 'strings').map(([k]) => k)));
 
 function merge<T>(base: T, override: unknown): T {
   if (typeof override !== 'object' || override === null) return base;
@@ -120,7 +74,7 @@ function merge<T>(base: T, override: unknown): T {
     const b = out[key];
     out[key] =
       typeof b === 'object' && b !== null && !Array.isArray(b) && typeof v === 'object' && v !== null && !Array.isArray(v)
-        && key !== 'repos' && key !== 'facts'
+        && !WHOLE.has(key)
         ? merge(b, v)
         : v;
   }
@@ -163,9 +117,7 @@ export function parseConfig(text: string): Config {
     }
   }
   if (new Set(config.show).size !== config.show.length) throw new ConfigError('"show" names a card twice');
-  if (config.cards.summary.ring !== 'percent' && config.cards.summary.ring !== 'github') {
-    throw new ConfigError('"cards.summary.ring" must be "percent" or "github"');
-  }
+  for (const c of CARD_DEFS) (c.check as ((s: unknown) => void) | undefined)?.(config.cards[c.name]);
   if (old.length) markOld(config);
   return config;
 }
@@ -178,10 +130,4 @@ export function loadConfig(path: string): Config {
     throw new ConfigError(`cannot read config file ${path}`);
   }
   return parseConfig(text);
-}
-
-/** "repo" means a repo of the user; "owner/repo" is taken as is. Lowercased for matching. */
-export function repoKey(ref: string, login: string): string {
-  const name = ref.includes('/') ? ref : `${login}/${ref}`;
-  return name.toLowerCase();
 }

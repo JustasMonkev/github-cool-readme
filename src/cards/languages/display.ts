@@ -1,24 +1,13 @@
 // Languages as a pinball-style display: one language at a time, one bar that grows and shrinks.
 
-import type { LanguageItem } from '../compute.ts';
-import { textCells, textWidth } from './font.ts';
-import { COLS, H, PITCH, TITLE_ROW, W, drawDots, frame, keyframes, path, type Cell, type Look, type Style } from './dmd.ts';
-import { ENTER, HOLD, slideshow, type Item } from './slides.ts';
+import type { LanguageItem } from '../../compute.ts';
+import { textCells, textWidth } from '../../display/font.ts';
+import { COLS, H, PITCH, W, drawDots, frame, keyframes, path, type Cell, type Style } from '../../display/dmd.ts';
+import { ENTER, HOLD, slideshow, type Item } from '../../display/slides.ts';
+import { fit, titleLine } from '../../display/text.ts';
 
 const BAR = { col: 4, row: 54, cols: COLS - 8, rows: 6 };
 const px = (cells: number) => cells * PITCH;
-
-/** Text cut to fit `cols` cells of the dot font. */
-export function fit(text: string, cols: number): string {
-  let out = text;
-  while (out.length > 1 && textWidth(out) > cols) out = out.slice(0, -1);
-  return out;
-}
-
-/** A card title on the title line, in the dim colour. */
-export function titleLine(title: string | null, look: Look): string {
-  return title ? path(textCells(fit(title.toUpperCase(), COLS - 8), 4, TITLE_ROW), look.lit, `fill-opacity="${look.dim}"`) : '';
-}
 
 export function renderDisplayLanguages(items: LanguageItem[], title: string | null, style: Style): string {
   const { look } = style;

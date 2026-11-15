@@ -243,6 +243,12 @@ npm run lint:sh                              # shellcheck on setup (brew install
 
 `npm run dev` saves the raw data to `.cache/snapshot.json`. It names private repositories, so keep it out of anything public (it is gitignored).
 
+### Cards
+
+Each card has a folder in `src/cards/`: `index.ts` says what it is (its name, whether it's on by default, its alt text, its settings and what they may hold), `classic.ts` draws it in the classic style and `display.ts` as a dot matrix or OLED display. `src/cards/index.ts` lists them in their usual order. What they share is in `src/render/` (classic) and `src/display/` (the displays); their numbers come from `src/compute.ts`.
+
+To add one: its folder, its line in `src/cards/index.ts`, its numbers in `compute.ts`, and its name and alt text in setup (`tests/setup-sync.test.ts` fails until they're there).
+
 ### Golden test
 
 `npm test` renders every card in every look (each style, colour, background, still or animated; see `tests/golden/matrix.ts`) from the same made-up data, and compares each with its hash in `tests/golden/hashes.txt`. Any change to any card fails it, naming the cards.

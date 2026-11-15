@@ -4,7 +4,7 @@ import { COLORS, DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.
 import { cellsPath, dotsPath, look, ringCells } from '../src/display/dmd.ts';
 import { textCells, textWidth } from '../src/display/font.ts';
 import { rasterize } from '../src/display/raster.ts';
-import { renderDisplayContributions } from '../src/display/contributions.ts';
+import { renderDisplayContributions } from '../src/cards/contributions/display.ts';
 import { slideshow } from '../src/display/slides.ts';
 import { cardWidths, renderAll } from '../src/render/index.ts';
 import { fixture } from './fixtures/snapshot.ts';

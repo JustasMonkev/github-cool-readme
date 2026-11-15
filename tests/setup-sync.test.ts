@@ -3,6 +3,7 @@
 // cards' titles. These tests read them out of its steps (setup/) and fail when the two drift apart.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { CARD_DEFS } from '../src/cards/index.ts';
 import { CARDS, COLORS, DEFAULT_CARDS, DEFAULT_CONFIG, NEW_KEYS, STYLES } from '../src/config.ts';
 import { OLD_CARDS, OLD_KEYS } from '../src/legacy.ts';
 import { look } from '../src/display/dmd.ts';
@@ -59,10 +60,7 @@ describe('setup agrees with the TypeScript on', () => {
     const pictures = Object.fromEntries(
       [...setup.matchAll(/(\w+)\) picture \w+ "\$WIDTH" "([^"]+)"/g)].map((m) => [m[1], m[2]]),
     );
-    const titles = Object.fromEntries(
-      CARDS.map((card) => [card, card === 'summary' ? 'GitHub stats' : DEFAULT_CONFIG.cards[card].title]),
-    );
-    expect(pictures).toEqual(titles);
+    expect(pictures).toEqual(Object.fromEntries(CARD_DEFS.map((card) => [card.name, card.alt])));
     const width = Number(find(/^WIDTH=(\d+)$/m));
     for (const w of Object.values(cardWidths(DEFAULT_CONFIG))) expect(w).toBe(width);
   });

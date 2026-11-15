@@ -1,4 +1,5 @@
-import { repoKey, type Config } from './config.ts';
+import type { Config } from './config.ts';
+import { repoKey } from './repos.ts';
 import { streakDays, streakStats, type StreakDays, type Tile } from './stats.ts';
 import type { ContributionWindow, Snapshot } from './types.ts';
 
