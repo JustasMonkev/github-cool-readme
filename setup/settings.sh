@@ -8,7 +8,7 @@ ROWS=(private orgs style color background)
 row_name() { case "$1" in color) echo colour ;; private) echo "private repos" ;; orgs) echo "org repos" ;; *) echo "$1" ;; esac; }
 row_values() {
   case "$1" in
-    style) echo "classic oled dotmatrix" ;; color) echo "github amber green purple cyan red blue" ;;
+    style) echo "classic oled dotmatrix floating" ;; color) echo "github amber green purple cyan red blue" ;;
     background) echo "none ${S_BG_OWN:+$S_BG_OWN }dark" ;; *) echo "true false" ;;
   esac
 }

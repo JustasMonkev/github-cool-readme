@@ -88,7 +88,7 @@ describe('shapes as dots', () => {
 });
 
 describe('drawing cells', () => {
-  const style = (dots: boolean): Style => ({ look: look('amber', 'dark'), dots, animations: true, background: null });
+  const style = (dots: boolean): Style => ({ look: look('amber', 'dark'), dots, grid: true, animations: true, background: null });
   const cells: [number, number][] = [[0, 0], [1, 0], [2, 0]];
 
   it('draws round dots or square pixels as the style says, whatever was drawn before', () => {
@@ -113,7 +113,7 @@ describe('drawing cells', () => {
 });
 
 describe('slideshow', () => {
-  const style = { look: look('amber', 'dark'), dots: true, animations: true, background: null };
+  const style = { look: look('amber', 'dark'), dots: true, grid: true, animations: true, background: null };
   const slides = [1, 2, 3].map((n) => [{ text: `S${n}`, col: 0, row: 0 }]);
 
   it('hides every slide but the last at the end of the loop', () => {
@@ -201,7 +201,7 @@ describe('oled cards', () => {
   });
 
   it('shows an empty contributions card', () => {
-    expect(renderDisplayContributions([], 'Notable contributions', { look: look('green', 'dark'), dots: true, animations: true, background: null })).toContain('No contributions');
+    expect(renderDisplayContributions([], 'Notable contributions', { look: look('green', 'dark'), dots: true, grid: true, animations: true, background: null })).toContain('No contributions');
   });
 
   it('is shown at 400 wide so two fit a row', () => {
@@ -218,6 +218,25 @@ describe('settings', () => {
     expect(files('dotmatrix')).toContain('stroke-dasharray="0 3"'); // round LEDs
     expect(files('oled')).not.toContain('stroke-dasharray="0 3"'); // square pixels
     expect(files('oled')).toContain('#3dff74');
+  });
+
+  it('draws floating as dotmatrix without the unlit dots, every card, every colour', () => {
+    const all = (style: string, color: string, background: string) => {
+      const c = parseConfig(`show: [${CARDS.join(', ')}]\nlook:\n  style: ${style}\n  color: ${color}\n  background: ${background}\n`);
+      return renderAll(compute(fixture(), c), c);
+    };
+    // The unlit dots: the one path in the faint opacity, right after the panel.
+    const unlit = /\n<path d="M1\.5 1\.5[^"]*" fill="none" stroke="[^"]+" stroke-width="2\.4" stroke-linecap="round" stroke-dasharray="0 3" stroke-opacity="[\d.]+"\/>/;
+    for (const color of COLORS) {
+      for (const background of ['none', '0d1117']) {
+        const grid = all('dotmatrix', color, background);
+        const floating = all('floating', color, background);
+        for (const [name, svg] of Object.entries(grid)) {
+          expect(svg, `${color} ${background} ${name}`).toMatch(unlit);
+          expect(floating[name], `${color} ${background} ${name}`).toBe(svg.replace(unlit, '\n'));
+        }
+      }
+    }
   });
 
   it('has every colour, each with its own shades, in every style', () => {

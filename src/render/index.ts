@@ -23,7 +23,9 @@ export function renderAll(model: Model, config: Config): Record<string, string> 
       // "solid" only comes from settings in the layout before v1.5 (legacy.ts): the colour's own panel.
       const l = look(config.look.color, mode, bg === 'solid' || (colour !== null && mode === 'dark'));
       const background = bg === 'none' ? null : bg === 'solid' ? l.panel : colour;
-      const style: Style = { look: l, dots: config.look.style === 'dotmatrix', animations: config.look.animations, background };
+      // dotmatrix and floating: round LEDs, over the unlit ones in dotmatrix; oled: square pixels.
+      const dots = config.look.style === 'dotmatrix' || config.look.style === 'floating';
+      const style: Style = { look: l, dots, grid: config.look.style === 'dotmatrix', animations: config.look.animations, background };
       draw = (card) => (card.display as (data: unknown, style: Style, config: Config) => string)(model[card.name], style, config);
     } else {
       draw = (card) => (card.classic as (data: unknown, theme: Theme, config: Config) => string)(model[card.name], theme, config);

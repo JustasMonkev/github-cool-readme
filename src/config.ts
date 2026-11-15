@@ -16,7 +16,7 @@ export const CARDS: readonly Card[] = CARD_DEFS.map((c) => c.name);
 /** The cards made when the settings don't list any; the others are there to turn on. */
 export const DEFAULT_CARDS: Card[] = CARD_DEFS.filter((c) => c.on).map((c) => c.name);
 
-export const STYLES = ['classic', 'oled', 'dotmatrix'] as const;
+export const STYLES = ['classic', 'oled', 'dotmatrix', 'floating'] as const;
 export type Style = (typeof STYLES)[number];
 export { COLORS, type Color };
 
@@ -33,7 +33,7 @@ export interface Config {
     orgs: boolean;
   };
   look: {
-    /** classic: GitHub-style cards. oled: displays of square pixels. dotmatrix: of round LEDs. */
+    /** classic: GitHub-style cards. oled: displays of square pixels. dotmatrix: of round LEDs, over the unlit ones. floating: round LEDs alone. */
     style: Style;
     /** github: GitHub's own blue and greens. amber, green, purple, cyan, red, blue: everything that highlights in that colour. */
     color: Color;

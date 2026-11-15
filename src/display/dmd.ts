@@ -163,6 +163,8 @@ export interface Style {
   look: Look;
   /** Round LED dots; otherwise the cells are drawn as solid square pixels. */
   dots: boolean;
+  /** With round dots: the faint unlit ones in every cell, behind the lit ones. */
+  grid: boolean;
   animations: boolean;
   /** The fill behind the dots; null for none, so the page shows through. */
   background: string | null;
@@ -173,6 +175,7 @@ export interface FrameOptions {
   desc: string;
   look: Look;
   dots: boolean;
+  grid: boolean;
   animations: boolean;
   background: string | null;
   css: string;
@@ -184,7 +187,7 @@ export function frame(o: FrameOptions): string {
   const panel = o.background ? `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="8" fill="${o.background}"/>` : '';
   // The unlit LEDs: one dotted line per row, faint. No masks or filters: Safari blurs those in images.
   let unlit = '';
-  if (o.dots) {
+  if (o.dots && o.grid) {
     const rows: string[] = [];
     for (let y = PITCH / 2; y < H; y += PITCH) rows.push(`M${PITCH / 2} ${y}h${(COLS - 1) * PITCH + PITCH / 2}`);
     unlit = `<path d="${rows.join('')}" ${dotted(l.unlit)} stroke-opacity="${l.unlitOpacity}"/>`;
