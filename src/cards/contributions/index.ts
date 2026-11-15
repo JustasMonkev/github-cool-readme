@@ -1,4 +1,5 @@
 import type { CardDef } from '../card.ts';
+import { contributionsData, type ContributionItem } from './data.ts';
 import { renderContributions } from './classic.ts';
 import { renderDisplayContributions } from './display.ts';
 
@@ -13,12 +14,13 @@ export interface ContributionsSettings {
   hide: string[];
 }
 
-export const contributions: CardDef<'contributions', ContributionsSettings> = {
+export const contributions: CardDef<'contributions', ContributionsSettings, ContributionItem[]> = {
   name: 'contributions',
   on: true,
   alt: 'Notable contributions',
   settings: { title: 'Notable contributions', count: 6, open: true, pin: [], hide: [] },
   shape: { title: 'string?', count: 'number', open: 'boolean', pin: 'string[]', hide: 'string[]' },
-  classic: (model, theme, config) => renderContributions(model.contributions, theme, config),
-  display: (model, style, config) => renderDisplayContributions(model.contributions, config.cards.contributions.title, style),
+  data: contributionsData,
+  classic: (data, theme, config) => renderContributions(data, theme, config),
+  display: (data, style, config) => renderDisplayContributions(data, config.cards.contributions.title, style),
 };

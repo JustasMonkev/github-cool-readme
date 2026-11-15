@@ -1,5 +1,5 @@
 import type { Config } from '../../config.ts';
-import type { LanguageItem } from '../../compute.ts';
+import type { LanguageItem } from './data.ts';
 import { CONTENT_TOP, PAD, WIDTH, TEXT, card, fadeIn, headerText, truncate, type Theme } from '../../render/classic.ts';
 import { esc } from '../../text.ts';
 

@@ -1,6 +1,7 @@
 // Numbers worked out from the contribution calendar of the last 12 months, for the streaks card.
-import { formatDay, formatMonth, formatNumber, plural } from './text.ts';
-import type { Snapshot } from './types.ts';
+import type { Counted } from '../../compute.ts';
+import { formatDay, formatMonth, formatNumber, plural } from '../../text.ts';
+import type { Snapshot } from '../../types.ts';
 
 /** A big number (or short text) with its label under it. */
 export interface Tile {
@@ -89,4 +90,18 @@ export function streakStats(days: Snapshot['calendar']): Tile[] {
     { label: best ? `Best day · ${formatDay(best.date)}, ${best.date.slice(0, 4)}` : 'Best day', value: best?.count ?? 0 },
     { label: bestMonth ? `Best month · ${formatMonth(`${bestMonth[0]}-01`)}` : 'Best month', value: bestMonth?.[1] ?? 0 },
   ];
+}
+
+/** The streaks card's data: its tiles, and the days behind them for the OLED card's strip. */
+export interface StreaksData {
+  tiles: Tile[];
+  days: StreakDays;
+}
+
+export function streaksData({ snapshot, config, filtering, note }: Counted): StreaksData {
+  // The last 12 months, like the active days and the weekly rhythm; the calendar can't be filtered.
+  if (filtering && config.show.includes('streaks')) {
+    note('the count settings cannot filter the contribution calendar, so the streaks card still counts private and organization work');
+  }
+  return { tiles: streakStats(snapshot.calendar), days: streakDays(snapshot.calendar) };
 }

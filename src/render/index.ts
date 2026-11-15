@@ -3,7 +3,7 @@ import { CARDS, type Config } from '../config.ts';
 import type { Model } from '../compute.ts';
 import { look, type Style } from '../display/dmd.ts';
 import { surfaceOf, type Mode } from '../palette.ts';
-import { themeFor } from './classic.ts';
+import { themeFor, type Theme } from './classic.ts';
 
 /**
  * File name -> SVG, one light and one dark variant of each card in `config.show`, in the usual
@@ -24,9 +24,9 @@ export function renderAll(model: Model, config: Config): Record<string, string> 
       const l = look(config.look.color, mode, bg === 'solid' || (colour !== null && mode === 'dark'));
       const background = bg === 'none' ? null : bg === 'solid' ? l.panel : colour;
       const style: Style = { look: l, dots: config.look.style === 'dotmatrix', animations: config.look.animations, background };
-      draw = (card) => card.display(model, style, config);
+      draw = (card) => (card.display as (data: unknown, style: Style, config: Config) => string)(model[card.name], style, config);
     } else {
-      draw = (card) => card.classic(model, theme, config);
+      draw = (card) => (card.classic as (data: unknown, theme: Theme, config: Config) => string)(model[card.name], theme, config);
     }
     for (const card of CARD_DEFS) if (config.show.includes(card.name)) files[`${card.name}-${viewer}.svg`] = draw(card);
   }

@@ -8,7 +8,7 @@ import { wrap } from '../src/cards/about/display.ts';
 import { textCells } from '../src/display/font.ts';
 import { markedText, wrapMarked } from '../src/render/classic.ts';
 import { marked, unmarked } from '../src/text.ts';
-import { streakDays, streakLengths, streakStats } from '../src/stats.ts';
+import { streakDays, streakLengths, streakStats } from '../src/cards/streaks/data.ts';
 import { fixture } from './fixtures/snapshot.ts';
 
 const render = (card: 'streaks' | 'about', patch: (c: Config) => void = () => {}) => {
@@ -42,7 +42,7 @@ describe('streaks', () => {
   });
 
   it('reports the streaks, active days and the best day and month', () => {
-    const stats = compute(fixture(), DEFAULT_CONFIG).streaks;
+    const stats = compute(fixture(), DEFAULT_CONFIG).streaks.tiles;
     // The last 12 months' calendar, Oct 1-10: 0 0 0 0 4 5 6 7 8 9.
     expect(tile(stats, 'Current streak')).toBe('6 days');
     expect(tile(stats, 'Longest streak')).toBe('6 days');

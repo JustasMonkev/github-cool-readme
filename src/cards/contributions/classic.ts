@@ -1,5 +1,5 @@
 import type { Config } from '../../config.ts';
-import type { ContributionItem } from '../../compute.ts';
+import type { ContributionItem } from './data.ts';
 import { icon } from '../../render/icons.ts';
 import {
   CONTENT_TOP, PAD, SMALL, TEXT, WIDTH, card, pageOffsets as pages, scrolling, fadeIn, headerText, textWidth, truncate, type Theme,

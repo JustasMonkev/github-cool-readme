@@ -1,5 +1,5 @@
 import type { Config } from '../../config.ts';
-import { DAY_NAMES, weekdayFacts, type WeekdayItem } from '../../compute.ts';
+import { DAY_NAMES, weekdayFacts, type WeekdayItem } from './data.ts';
 import { CONTENT_TOP, PAD, SMALL, WIDTH, card, fadeIn, headerText, truncate, type Theme } from '../../render/classic.ts';
 import { esc, formatNumber } from '../../text.ts';
 

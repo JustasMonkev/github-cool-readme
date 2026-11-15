@@ -2,7 +2,7 @@
 // days that shows what the number is about: the current run, the longest one wherever it was, the
 // active days, how they compare with the average, the best day, the best month.
 
-import type { StreakDays, Tile } from '../../stats.ts';
+import type { StreakDays, Tile } from './data.ts';
 import { textWidth } from '../../display/font.ts';
 import { COLS, frame, path, type Cell, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';

@@ -1,5 +1,6 @@
 import { ConfigError } from '../../shape.ts';
 import type { CardDef } from '../card.ts';
+import { languagesData, type LanguageItem } from './data.ts';
 import { renderLanguages } from './classic.ts';
 import { renderDisplayLanguages } from './display.ts';
 
@@ -17,7 +18,7 @@ export interface LanguagesSettings {
 
 export const MAX_LANGUAGES = 6;
 
-export const languages: CardDef<'languages', LanguagesSettings> = {
+export const languages: CardDef<'languages', LanguagesSettings, LanguageItem[]> = {
   name: 'languages',
   on: true,
   alt: 'Most used languages',
@@ -26,6 +27,7 @@ export const languages: CardDef<'languages', LanguagesSettings> = {
   check: (s) => {
     if (s.count > MAX_LANGUAGES) throw new ConfigError(`"cards.languages.count" must be at most ${MAX_LANGUAGES}, "Other" included`);
   },
-  classic: (model, theme, config) => renderLanguages(model.languages, theme, config),
-  display: (model, style, config) => renderDisplayLanguages(model.languages, config.cards.languages.title, style),
+  data: languagesData,
+  classic: (data, theme, config) => renderLanguages(data, theme, config),
+  display: (data, style, config) => renderDisplayLanguages(data, config.cards.languages.title, style),
 };

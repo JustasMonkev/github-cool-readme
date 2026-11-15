@@ -12,12 +12,14 @@ export interface AboutSettings {
   facts: Record<string, string>;
 }
 
-export const about: CardDef<'about', AboutSettings> = {
+export const about: CardDef<'about', AboutSettings, null> = {
   name: 'about',
   on: false,
   alt: 'About',
   settings: { title: 'About', headline: null, lines: [], facts: {} },
   shape: { title: 'string?', headline: 'string?', lines: 'string[]', facts: 'strings' },
-  classic: (_model, theme, config) => renderAbout(theme, config),
-  display: (_model, style, config) => renderDisplayAbout(config.cards.about, style),
+  // Its text is in its settings: nothing to work out.
+  data: () => null,
+  classic: (_data, theme, config) => renderAbout(theme, config),
+  display: (_data, style, config) => renderDisplayAbout(config.cards.about, style),
 };
