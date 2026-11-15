@@ -1,7 +1,8 @@
 // The streaks and about cards.
 import { describe, expect, it } from 'vitest';
 import { compute } from '../src/compute.ts';
-import { CARDS, DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.ts';
+import { CARD_DEFS } from '../src/cards/index.ts';
+import { DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.ts';
 import { renderAll } from '../src/render/index.ts';
 import { wrap } from '../src/cards/about/display.ts';
 import { textCells } from '../src/display/font.ts';
@@ -166,9 +167,9 @@ describe('about', () => {
 
 describe('the new cards', () => {
   it('are off unless listed', () => {
-    expect(CARDS).toEqual(expect.arrayContaining(['streaks', 'about']));
-    expect(DEFAULT_CONFIG.show).toEqual(['summary', 'languages', 'contributions', 'weekly']);
-    expect(Object.keys(renderAll(compute(fixture(), DEFAULT_CONFIG), DEFAULT_CONFIG))).not.toContain('streaks-light.svg');
+    expect(CARD_DEFS.filter((c) => !c.on).map((c) => c.name)).toEqual(['streaks', 'about']);
+    const made = Object.keys(renderAll(compute(fixture(), DEFAULT_CONFIG), DEFAULT_CONFIG));
+    for (const card of ['streaks', 'about']) expect(made).not.toContain(`${card}-light.svg`);
   });
 
   it('come as dot-matrix displays with the oled style, the shape of the others', () => {

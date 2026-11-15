@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { compute, weekdayFacts } from '../src/compute.ts';
-import { DEFAULT_CONFIG, type Config } from '../src/config.ts';
+import { CARDS, DEFAULT_CARDS, DEFAULT_CONFIG, STYLES, type Config } from '../src/config.ts';
 import { describe as describeItem, pageOffsets, renderContributions } from '../src/cards/contributions/classic.ts';
 import { renderAll } from '../src/render/index.ts';
 import { THEMES } from '../src/palette.ts';
@@ -26,17 +26,17 @@ const render = (patch: (c: Config) => void = () => {}) => {
 };
 
 describe('cards', () => {
+  // Every card, so a new one is checked here without being listed.
+  const everyCard = (c: Config) => (c.show = [...CARDS]);
+  const names = (cards: readonly string[]) => cards.flatMap((card) => [`${card}-dark.svg`, `${card}-light.svg`]).sort();
+
   it('writes a light and a dark variant of each card', () => {
-    expect(Object.keys(render()).sort()).toEqual([
-      'contributions-dark.svg', 'contributions-light.svg',
-      'languages-dark.svg', 'languages-light.svg',
-      'summary-dark.svg', 'summary-light.svg',
-      'weekly-dark.svg', 'weekly-light.svg',
-    ]);
+    expect(Object.keys(render()).sort()).toEqual(names(DEFAULT_CARDS));
+    expect(Object.keys(render(everyCard)).sort()).toEqual(names(CARDS));
   });
 
   it('makes only the cards in the show setting, in every style', () => {
-    for (const style of ['classic', 'oled', 'dotmatrix'] as const) {
+    for (const style of STYLES) {
       const files = render((c) => { c.look.style = style; c.show = ['weekly', 'summary']; });
       expect(Object.keys(files).sort()).toEqual(['summary-dark.svg', 'summary-light.svg', 'weekly-dark.svg', 'weekly-light.svg']);
       // The same cards as when all are made: leaving some out changes nothing in the others.
@@ -45,17 +45,28 @@ describe('cards', () => {
     }
   });
 
-  it('produces well-formed SVG with no missing values', () => {
-    for (const [name, svg] of Object.entries(render())) {
-      assertWellFormed(svg);
-      expect(svg, name).not.toMatch(/NaN|undefined|null|Infinity/);
+  it('produces well-formed SVG with no missing values, every card in every style', () => {
+    for (const style of STYLES) {
+      for (const [name, svg] of Object.entries(render((c) => { everyCard(c); c.look.style = style; }))) {
+        assertWellFormed(svg);
+        expect(svg, `${style} ${name}`).not.toMatch(/NaN|undefined|null|Infinity/);
+      }
     }
   });
 
-  it('makes the cards one size', () => {
+  it('makes the cards one size: every classic card 400 x 195, every display 450 x 219', () => {
     const size = (svg: string) => svg.match(/<svg [^>]*width="(\d+)" height="(\d+)"/)!.slice(1).join('x');
-    const files = render();
-    for (const card of ['summary', 'contributions', 'languages', 'weekly']) expect(size(files[`${card}-light.svg`])).toBe('400x195');
+    for (const style of STYLES) {
+      const files = render((c) => { everyCard(c); c.look.style = style; });
+      for (const card of CARDS) expect(size(files[`${card}-light.svg`]), `${style} ${card}`).toBe(style === 'classic' ? '400x195' : '450x219');
+    }
+  });
+
+  it('draws every display card in dots, with no text set in a font', () => {
+    for (const style of STYLES.filter((s) => s !== 'classic')) {
+      const files = render((c) => { everyCard(c); c.look.style = style; });
+      for (const card of CARDS) expect(files[`${card}-light.svg`], `${style} ${card}`).not.toContain('<text');
+    }
   });
 
   it('shows the summary numbers for the year and all time in turn, or all time without animations', () => {
