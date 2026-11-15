@@ -174,6 +174,15 @@ describe("the about card's text", () => {
     expect(parseConfig(read('c.yml')).cards.about).toMatchObject({ headline, lines: [line], facts: { [fact[0]]: fact[1] } });
   });
 
+  it('replaces text the action cannot read, as typing it again in setup does', () => {
+    const broken = lines('cards:', '  about:', '    lines:', '      - "I work at <a href="https://example.com/">Example</a>"', 'look:', '  style: oled');
+    expect(() => parseConfig(broken)).toThrow("isn't valid YAML");
+    const link = '<a href="https://example.com/">Example</a>';
+    const { read } = run(String.raw`about_set c.yml "    lines:"$'\n'"      - $(quoted "$1")"`, { 'c.yml': broken }, [`I work at ${link}`]);
+    expect(parseConfig(read('c.yml')).cards.about.lines).toEqual([`I work at ${link}`]);
+    expect(parseConfig(read('c.yml')).look.style).toBe('oled');
+  });
+
   it('is empty with the placeholder, and not once it has text', () => {
     const empty = (text: string) => run('if about_empty c.yml; then echo empty; else echo text; fi', { 'c.yml': text }).out;
     expect(empty(lines('show: [about]'))).toBe('empty');

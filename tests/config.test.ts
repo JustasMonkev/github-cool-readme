@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG, parseConfig } from '../src/config.ts';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { ConfigError, DEFAULT_CONFIG, loadConfig, parseConfig } from '../src/config.ts';
 import { repoKey } from '../src/repos.ts';
 import { usesOldLayout } from '../src/legacy.ts';
 
@@ -15,6 +18,30 @@ describe('config', () => {
     expect(c.cards.languages.count).toBe(6);
     expect(c.cards.languages.repos).toEqual({ big: 0.5 });
     expect(c.look).toEqual(DEFAULT_CONFIG.look);
+  });
+
+  it("says where a file isn't YAML, and how to fix it", () => {
+    const text = 'show: [about]\ncards:\n  about:\n    lines:\n      - "at <a href="https://example.com/">Example</a>"\n';
+    const err = (() => {
+      try {
+        parseConfig(text);
+      } catch (e) {
+        return e;
+      }
+    })();
+    expect(err).toBeInstanceOf(ConfigError);
+    expect((err as ConfigError).message).toMatch(/^the settings file isn't valid YAML at line 5, column \d+: /);
+    expect((err as ConfigError).message).toContain('- "at <a href="https://example.com/">Example</a>"');
+    expect((err as ConfigError).message).toContain('run setup again, answer no to "Keep it?"');
+    expect((err as ConfigError).at).toMatchObject({ line: 5 });
+
+    const dir = mkdtempSync(join(tmpdir(), 'cool-readme-config-'));
+    try {
+      writeFileSync(join(dir, 'cool-readme.yml'), text);
+      expect(() => loadConfig(join(dir, 'cool-readme.yml'))).toThrow(`${join(dir, 'cool-readme.yml')} isn't valid YAML at line 5`);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('rejects unknown settings, so typos do not pass silently', () => {

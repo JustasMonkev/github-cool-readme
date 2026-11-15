@@ -2,7 +2,14 @@
 // (config.ts) and those from before v1.5 (legacy.ts).
 import { isScalar } from 'yaml';
 
-export class ConfigError extends Error {}
+export class ConfigError extends Error {
+  /** Where in the settings file, when it's about one place in it. */
+  at?: { file?: string; line: number; col: number };
+  constructor(message: string, at?: { line: number; col: number }) {
+    super(message);
+    this.at = at;
+  }
+}
 
 export type Shape = { [key: string]: 'boolean' | 'string' | 'string?' | 'number' | 'string[]' | 'weights' | 'strings' | Shape };
 

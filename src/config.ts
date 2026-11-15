@@ -1,11 +1,14 @@
 import { readFileSync } from 'node:fs';
-import { parseDocument } from 'yaml';
+import { parseDocument, type YAMLError } from 'yaml';
 import { CARD_DEFS, type CardDefs, type CardSettings } from './cards/index.ts';
 import { fromOld, markOld, oldKeys } from './legacy.ts';
 import { COLORS, type Color } from './palette.ts';
 import { ConfigError, background, check, emptyMappings, isMap, type Raw, type Shape } from './shape.ts';
 
 export { ConfigError };
+
+/** How to run setup, for the errors it fixes. */
+export const SETUP_COMMAND = 'bash <(curl -fsSL https://raw.githubusercontent.com/pedrocatalao/github-cool-readme/v1/setup.sh)';
 
 /** The cards, in their usual order: see cards/index.ts. */
 export type Card = CardDefs['name'];
@@ -85,7 +88,7 @@ export const NEW_KEYS = ['show', 'count', 'look'];
 
 export function parseConfig(text: string): Config {
   const doc = parseDocument(text);
-  if (doc.errors.length) throw doc.errors[0];
+  if (doc.errors.length) throw notYaml(doc.errors[0]);
   const parsed: unknown = doc.toJS() ?? {};
   if (!isMap(parsed)) throw new ConfigError('config must be a mapping');
   let raw: Raw = parsed;
@@ -122,6 +125,25 @@ export function parseConfig(text: string): Config {
   return config;
 }
 
+/**
+ * A file that isn't YAML: where, what yaml says, and how to fix it. Quotes inside quotes are the
+ * usual cause, as in text with an HTML link.
+ */
+function notYaml(err: YAMLError): ConfigError {
+  const [head, context = ''] = err.message.split(':\n\n');
+  const what = head.replace(/ at line \d+, column \d+$/, '');
+  const pos = err.linePos?.[0];
+  return new ConfigError(
+    `the settings file isn't valid YAML${pos ? ` at line ${pos.line}, column ${pos.col}` : ''}: ${what[0].toLowerCase()}${what.slice(1)}` +
+      (context.trim() ? `\n\n${context.trimEnd()}\n\n` : '\n') +
+      'Often it\'s a quote inside quoted text, like an HTML link: write each " inside "..." as \\", or put the text in ' +
+      "'...' and write each ' inside as ''.\n" +
+      'Fix it by hand, or, if it\'s in the about card\'s text, run setup again, answer no to "Keep it?" and type the ' +
+      `text again:\n  ${SETUP_COMMAND}`,
+    pos && { line: pos.line, col: pos.col },
+  );
+}
+
 export function loadConfig(path: string): Config {
   let text: string;
   try {
@@ -129,5 +151,13 @@ export function loadConfig(path: string): Config {
   } catch {
     throw new ConfigError(`cannot read config file ${path}`);
   }
-  return parseConfig(text);
+  try {
+    return parseConfig(text);
+  } catch (err) {
+    if (err instanceof ConfigError) {
+      err.message = err.message.replace(/^the settings file\b/, path);
+      if (err.at) err.at.file = path;
+    }
+    throw err;
+  }
 }
