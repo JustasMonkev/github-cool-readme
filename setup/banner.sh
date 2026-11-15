@@ -79,7 +79,6 @@ if $SHOW_STAR; then
   if $ASK_STAR; then printf '\033[%dA' "$(frame_height "$frame")"; fi
 fi
 if $ASK_STAR; then
-  frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
   enter_hint="$(paint 2 'Enter to continue')"
   frame="$(draw_banner ask)"
   printf '%s\n' "$frame"
@@ -90,8 +89,8 @@ if $ASK_STAR; then
   stty -icanon min 0 time 1 < /dev/tty # a key, or nothing after a tenth of a second
   ticks=40 i=0                         # 4 seconds
   while [ "$ticks" -gt 0 ]; do
-    printf '\r  \033[36m%s\033[0m %s %d   %s\033[K' \
-      "${frames[$((i % 10))]}" "$doing" $(((ticks + 9) / 10)) "$enter_hint"
+    printf '\r  %s %s %d   %s\033[K' \
+      "$(spinner_frame "$i")" "$doing" $(((ticks + 9) / 10)) "$enter_hint"
     i=$((i + 1))
     k="$(dd bs=16 count=1 2>/dev/null < /dev/tty; echo .)"
     k="${k%.}"

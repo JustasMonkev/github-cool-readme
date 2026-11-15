@@ -46,6 +46,9 @@ SETUP_BLOCKS=(
 
 SETUP_FIRST=3
 
+# The spinner's frames: the one below, and the steps' (the star's countdown, the first run's wait).
+SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+
 SETUP_REPO="pedrocatalao/github-cool-readme"
 SETUP_MAJOR="v1" # the releases this setup takes its steps from: v1 is always the newest
 SETUP_TMP=""     # where the steps were downloaded to, removed at the end
@@ -83,13 +86,12 @@ else
 
   # Something to see at once: a spinner until the title's steps are in.
   for setup_block in "${SETUP_BLOCKS[@]:0:SETUP_FIRST}"; do setup_get "$setup_block"; done
-  setup_frames=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
   setup_i=0
   while :; do
     setup_more=false
     for setup_block in "${SETUP_BLOCKS[@]:0:SETUP_FIRST}"; do setup_busy "$setup_block" && setup_more=true; done
     $setup_more || break
-    [ -t 1 ] && printf '\r  \033[36m%s\033[0m setting up github-cool-readme...' "${setup_frames[$((setup_i % 10))]}"
+    [ -t 1 ] && printf '\r  \033[36m%s\033[0m setting up github-cool-readme...' "${SPINNER[$((setup_i % ${#SPINNER[@]}))]}"
     setup_i=$((setup_i + 1))
     sleep 0.1
   done
