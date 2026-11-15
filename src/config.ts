@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { parseDocument } from 'yaml';
 import { CARD_DEFS, type CardDefs, type CardSettings } from './cards/index.ts';
 import { fromOld, markOld, oldKeys } from './legacy.ts';
+import { COLORS, type Color } from './palette.ts';
 import { ConfigError, background, check, emptyMappings, isMap, type Raw, type Shape } from './shape.ts';
 
 export { ConfigError };
@@ -14,8 +15,7 @@ export const DEFAULT_CARDS: Card[] = CARD_DEFS.filter((c) => c.on).map((c) => c.
 
 export const STYLES = ['classic', 'oled', 'dotmatrix'] as const;
 export type Style = (typeof STYLES)[number];
-export const COLORS = ['github', 'amber', 'green', 'purple', 'cyan', 'red', 'blue'] as const;
-export type Color = (typeof COLORS)[number];
+export { COLORS, type Color };
 
 export interface Config {
   /** GitHub login. Defaults to the token's owner. */

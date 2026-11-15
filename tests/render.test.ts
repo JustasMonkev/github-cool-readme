@@ -3,7 +3,8 @@ import { compute, weekdayFacts } from '../src/compute.ts';
 import { DEFAULT_CONFIG, type Config } from '../src/config.ts';
 import { describe as describeItem, pageOffsets, renderContributions } from '../src/cards/contributions/classic.ts';
 import { renderAll } from '../src/render/index.ts';
-import { THEMES, formatCompact, truncate } from '../src/render/svg.ts';
+import { THEMES } from '../src/palette.ts';
+import { formatCompact, truncate } from '../src/render/svg.ts';
 import { fixture } from './fixtures/snapshot.ts';
 
 /** Minimal well-formedness check: every opened tag is closed in order. */

@@ -1,6 +1,8 @@
 // Shared pieces of the display cards: a grid of 3px cells, looks (amber, green, GitHub
 // colours), the panel with optional round LED dots, and keyframe helpers.
 
+import { PALETTE, THEMES, type Color, type Mode } from '../palette.ts';
+
 export const PITCH = 3;
 
 // Every display card has the same size: 150 x 73 cells, 450 x 219, the classic cards' shape:
@@ -14,8 +16,6 @@ export const TITLE_ROW = 3;
 const FONT = `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif`;
 
 export type Cell = [number, number];
-export type Mode = 'light' | 'dark';
-export type Color = 'github' | 'amber' | 'green' | 'purple' | 'cyan' | 'red' | 'blue';
 
 export interface Look {
   /** Lit dots. */
@@ -34,33 +34,19 @@ export interface Look {
 }
 
 /**
- * A display's colours: bright on its dark panel, and for a light page without the panel a darker
- * shade (the bright ones fade on white) with a deeper one for the shine.
- */
-const DISPLAYS: Record<Exclude<Color, 'github'>, { bright: string; shine: string; panel: string; dark: string; deep: string; unlit: number }> = {
-  amber: { bright: '#ffab1a', shine: '#fff2cc', panel: '#0d0b07', dark: '#b35c00', deep: '#6e3800', unlit: 0.09 },
-  green: { bright: '#3dff74', shine: '#e8ffef', panel: '#070d09', dark: '#1a7f37', deep: '#0b4d1f', unlit: 0.08 },
-  purple: { bright: '#c77dff', shine: '#f3e6ff', panel: '#0c0710', dark: '#8250df', deep: '#4c2889', unlit: 0.1 },
-  cyan: { bright: '#22e3ff', shine: '#e0fbff', panel: '#050c0d', dark: '#0a7b8a', deep: '#054952', unlit: 0.08 },
-  red: { bright: '#ff4d4d', shine: '#ffe5e5', panel: '#0d0606', dark: '#cf222e', deep: '#82071e', unlit: 0.1 },
-  blue: { bright: '#4da3ff', shine: '#e3f0ff', panel: '#05080d', dark: '#0969da', deep: '#0a3069', unlit: 0.1 },
-};
-
-/**
  * The colours of a look. A colour is the same on both themes, like a real display, on its dark
  * panel; without the panel, a light page gets its darker shades. github follows the viewer's theme.
  */
 export function look(color: Color, mode: Mode, panel = true): Look {
   if (color !== 'github') {
-    const d = DISPLAYS[color];
+    const d = PALETTE[color].display;
     return !panel && mode === 'light'
       ? { lit: d.dark, accent: d.dark, shine: d.deep, dim: 0.65, panel: null, unlit: d.dark, unlitOpacity: 0.1 }
       : { lit: d.bright, accent: d.bright, shine: d.shine, dim: 0.55, panel: d.panel, unlit: d.bright, unlitOpacity: d.unlit };
   }
   // github: GitHub's Primer colours, on a transparent background, per light or dark theme.
-  return mode === 'light'
-    ? { lit: '#1f2328', accent: '#0969da', shine: '#0969da', dim: 0.6, panel: null, unlit: '#d1d9e0', unlitOpacity: 0.3 }
-    : { lit: '#f0f6fc', accent: '#4493f8', shine: '#4493f8', dim: 0.6, panel: null, unlit: '#3d444d', unlitOpacity: 0.35 };
+  const t = THEMES[mode];
+  return { lit: t.text, accent: t.accent, shine: t.accent, dim: 0.6, panel: null, unlit: t.border, unlitOpacity: mode === 'light' ? 0.3 : 0.35 };
 }
 
 /** Cells grouped into rectangles: neighbouring cells in a row form a run, and identical runs in rows that touch merge. */
