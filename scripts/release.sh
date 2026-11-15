@@ -35,7 +35,8 @@ ok() { printf '  ok  %s\n' "$1"; }
 # ------------------------------------------------------------------ checks
 
 [[ "$version" =~ ^${MAJOR#v}\.[0-9]+\.[0-9]+$ ]] || fail "$version is not a $MAJOR version like ${MAJOR#v}.6.4"
-[ -s "$notes" ] || fail "no release notes in $notes"
+[ -f "$notes" ] || fail "no notes file: $notes"
+grep -q '[^[:space:]]' "$notes" || fail "the notes in $notes are empty" # blank lines and spaces count as empty
 [ -n "$summary" ] || fail "the line for the tag is empty"
 gh auth status >/dev/null 2>&1 || fail "gh is not logged in: gh auth login"
 
