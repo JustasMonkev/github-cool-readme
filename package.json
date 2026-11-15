@@ -15,6 +15,7 @@
     "test:update": "vitest run --update",
     "review": "node scripts/review.ts",
     "lint:sh": "bash scripts/lint-setup.sh",
+    "release": "bash scripts/release.sh",
     "typecheck": "tsc",
     "preview": "node scripts/preview.ts",
     "examples": "node scripts/examples.ts"

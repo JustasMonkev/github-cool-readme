@@ -271,6 +271,14 @@ COOL_README_SETUP_REF=my-branch bash <(curl -fsSL https://raw.githubusercontent.
 
 `npm run lint:sh` checks the steps joined in that order, as bash runs them.
 
+### Releasing
+
+```bash
+npm run release -- 1.6.4 notes.md "what's in it, in a line"   # --dry-run first to see what it would do
+```
+
+From `main`, once CI has passed on it: the tag `v1.6.4` and its GitHub release with `notes.md` as the notes, then `v1` moved to it. In that order, as setup takes its steps from the newest release. It checks first and asks before changing anything.
+
 ## License
 
 MIT
