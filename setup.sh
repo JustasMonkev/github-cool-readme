@@ -51,6 +51,7 @@ stop_jobs() {
   local job children
   for job in $(jobs -p); do
     children="$(pgrep -P "$job" 2>/dev/null || true)"
+    # shellcheck disable=SC2086 # $children is a list of pids, split on purpose
     kill "$job" $children 2>/dev/null || true
     wait "$job" 2>/dev/null || true
   done
@@ -193,7 +194,7 @@ yesno() {
         ' ') if [ "$answer" = yes ]; then answer=no; else answer=yes; fi ;;
         LEFT) answer=yes ;;
         RIGHT) answer=no ;;
-        d | D) [ -n "${3:-}" ] && { answer=diff; break; } ;;
+        d | D) [ -n "${3:-}" ] && { answer="diff"; break; } ;;
       esac
       paint_frame "$(draw_yesno "$answer" "$hint")"
     done
@@ -209,7 +210,7 @@ yesno() {
       y | Y) answer=yes; break ;;
       n | N) answer=no; break ;;
       '') answer=no; [ "$def" = y ] && answer=yes; break ;;
-      d | D) [ -n "${3:-}" ] && { answer=diff; break; } ;;
+      d | D) [ -n "${3:-}" ] && { answer="diff"; break; } ;;
     esac
   done
   if [ "$answer" = diff ]; then echo; else paint 1 "$answer"; echo; fi
@@ -463,11 +464,11 @@ settings_frame() { # settings_frame [done]: the settings screen's lines
       else line="$line  $(paint 2 "○ $(row_label "$row" "$v")")"
       fi
     done
-    mark="  "; [ "${1:-}" != done ] && [ "$n" = "$SROW" ] && mark="$(paint 1 '▸') "
+    mark="  "; [ "${1:-}" != "done" ] && [ "$n" = "$SROW" ] && mark="$(paint 1 '▸') "
     printf '%s%s%s%s\n' "${INDENT%  }" "$mark" "$(printf '%-13s' "$(row_name "$row")")" "$line"
     n=$((n + 1))
   done
-  [ "${1:-}" = done ] || printf '%s%s\n' "$INDENT" "$(paint 2 "↑↓ to choose, space to change, Enter to continue")"
+  [ "${1:-}" = "done" ] || printf '%s%s\n' "$INDENT" "$(paint 2 "↑↓ to choose, space to change, Enter to continue")"
 }
 settings_screen() {
   local row n count
@@ -475,12 +476,14 @@ settings_screen() {
     for row in $(rows); do note "$(printf '%-13s %s' "$(row_name "$row")" "$(row_label "$row" "$(get_row "$row")")")"; done
     return
   fi
+  # shellcheck disable=SC2046 # the setting names have no spaces: split on purpose
   count="$(set -- $(rows); echo $#)"
   quiet_keys on
   FRAME_H=0; draw_settings
   while :; do
     read_key
     [ -n "$KEY" ] || break
+    # shellcheck disable=SC2046 # the setting names have no spaces: split on purpose
     row="$(set -- $(rows); eval "echo \${$SROW}")"
     case "$KEY" in
       UP) [ "$SROW" -gt 1 ] && SROW=$((SROW - 1)) ;;
@@ -491,7 +494,7 @@ settings_screen() {
     draw_settings
   done
   quiet_keys off
-  draw_settings done # the settings stay, the hint goes
+  draw_settings "done" # the settings stay, the hint goes
 }
 
 # ------------------------------------------------------------------ the about card's text
@@ -674,7 +677,7 @@ if $ASK_STAR; then
   done
   quiet_keys off
   printf '\r\033[%dA' "$UP" # the title and the star as you left it, without the key and the countdown
-  draw_banner done
+  draw_banner "done"
   printf '\033[J'
   if [ "$STAR" = on ]; then
     if $DRY_RUN; then report "dry run" "would star $TOOL_REPO"
@@ -683,7 +686,7 @@ if $ASK_STAR; then
     fi
   fi
 elif $SHOW_STAR; then
-  draw_banner done # starred already: the star, lit, and nothing to ask
+  draw_banner "done" # starred already: the star, lit, and nothing to ask
 else
   for line in "${TITLE[@]}"; do printf '  %s\n' "$line"; done
   printf '  %s\n' "$(paint 2 "$TAGLINE")"
@@ -851,11 +854,12 @@ known() { # known "card card": the known cards among them, each once, in the ord
 without() { printf ' %s ' "$1" | sed "s/ $2 / /; s/^ *//; s/ *$//"; } # without "list" card
 move_card() { # move_card up|down: SEL one place up or down among the cards that are on
   local a i j t
+  # shellcheck disable=SC2206 # card names have no spaces: split on purpose
   a=($S_CARDS)
   for ((i = 0; i < ${#a[@]}; i++)); do [ "${a[$i]}" = "$SEL" ] && break; done
   if [ "$1" = up ]; then j=$((i - 1)); else j=$((i + 1)); fi
   { [ "$i" -lt "${#a[@]}" ] && [ "$j" -ge 0 ] && [ "$j" -lt "${#a[@]}" ]; } || return 0
-  t="${a[$i]}"; a[$i]="${a[$j]}"; a[$j]="$t"
+  t="${a[$i]}"; a[i]="${a[$j]}"; a[j]="$t"
   S_CARDS="${a[*]}"
 }
 draw_cards() { # draw_cards hint: a row per card, ● on or ○ off, the selected one marked; then the hint if any
@@ -885,14 +889,15 @@ $WAS_OFF || cur_cards="${cur_cards:-$DEFAULT_CARDS}"
 S_CARDS="$cur_cards"
 OFF=""
 for card in $CARD_NAMES; do card_on "$card" || OFF="${OFF:+$OFF }$card"; done
+# shellcheck disable=SC2086 # card names have no spaces: split on purpose
 SEL="$(set -- $S_CARDS $OFF; echo "$1")"
-ROWS="$(set -- $CARD_NAMES; echo $#)"
 cards_hint() {
   if [ -n "$S_CARDS" ]; then echo "↑↓ to choose, space for on/off, shift ↑↓ to move, Enter to continue"
   else echo "all off: out of your README, no schedule; space for on/off, Enter to continue"; fi
 }
 move_sel() { # move_sel up|down: the ▸ to the row above or below
   local a i
+  # shellcheck disable=SC2206 # card names have no spaces: split on purpose
   a=($S_CARDS $OFF)
   for ((i = 0; i < ${#a[@]}; i++)); do [ "${a[$i]}" = "$SEL" ] && break; done
   if [ "$1" = up ] && [ "$i" -gt 0 ]; then SEL="${a[$((i - 1))]}"; fi
@@ -912,8 +917,10 @@ if $FANCY; then
       SHIFT_DOWN) card_on "$SEL" && move_card down ;;
       ' ')
         if card_on "$SEL"; then # the ▸ stays on its row, on the card that takes the place of this one
+          # shellcheck disable=SC2086 # card names have no spaces: split on purpose
           row="$(set -- $S_CARDS $OFF; i=1; for c; do [ "$c" = "$SEL" ] && break; i=$((i + 1)); done; echo "$i")"
           S_CARDS="$(without "$S_CARDS" "$SEL")"; OFF="$SEL${OFF:+ $OFF}"
+          # shellcheck disable=SC2086 # card names have no spaces: split on purpose
           SEL="$(set -- $S_CARDS $OFF; eval "echo \${$row}")"
         else OFF="$(without "$OFF" "$SEL")"; S_CARDS="${S_CARDS:+$S_CARDS }$SEL"; fi ;;
     esac
@@ -1121,6 +1128,7 @@ if grep -qF "$START" README.md && grep -qF "$END" README.md; then
   mv README.md.new README.md
   where="between the cool-readme markers"
 else
+  # shellcheck disable=SC2094 # only checks the size before appending; nothing reads it in the pipeline
   { [ -s README.md ] && echo; cat "$block"; } >> README.md
   where="at the end; move the marked block wherever you like"
 fi
