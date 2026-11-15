@@ -14,7 +14,6 @@ export const W = COLS * PITCH; // 450
 export const H = ROWS * PITCH; // 219
 /** The row of the title line at the top of every card. */
 export const TITLE_ROW = 3;
-const FONT = `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif`;
 
 export type Cell = [number, number];
 
@@ -193,8 +192,7 @@ export function frame(o: FrameOptions): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none" role="img" aria-labelledby="title desc">
 <title id="title">${esc(o.title)}</title>
 <desc id="desc">${esc(o.desc)}</desc>
-<style>
-  text { font-family: ${FONT}; }${o.animations ? o.css : ''}
+<style>${o.animations ? o.css : ''}
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 ${panel}
