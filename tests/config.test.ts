@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG, parseConfig, repoKey, usesOldLayout } from '../src/config.ts';
+import { DEFAULT_CONFIG, parseConfig, repoKey } from '../src/config.ts';
+import { usesOldLayout } from '../src/legacy.ts';
 
 describe('config', () => {
   it('uses the defaults for an empty file', () => {

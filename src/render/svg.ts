@@ -256,6 +256,7 @@ export function surfaceOf(colour: string): Mode {
 
 export function card(o: CardOptions): string {
   const { theme: t, config } = o;
+  // "solid" only comes from settings in the layout before v1.5 (legacy.ts): GitHub's page colour, the viewer's.
   const bg = config.look.background === 'none' ? 'none' : config.look.background === 'solid' ? t.background : config.look.background;
   const stroke = config.look.border ? t.border : 'none';
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${o.width}" height="${o.height}" viewBox="0 0 ${o.width} ${o.height}" fill="none" role="img" aria-labelledby="title desc">

@@ -30,6 +30,7 @@ export function renderAll(model: Model, config: Config): Record<string, string> 
     let render: Record<Card, () => string>;
     if (config.look.style !== 'classic') {
       // Amber and green go darker only where they'd be on something light: no panel on a light page, or a light colour.
+      // "solid" only comes from settings in the layout before v1.5 (legacy.ts): the colour's own panel.
       const l = look(config.look.color, mode, bg === 'solid' || (colour !== null && mode === 'dark'));
       const background = bg === 'none' ? null : bg === 'solid' ? l.panel : colour;
       const style: Style = { look: l, dots: config.look.style === 'dotmatrix', animations: config.look.animations, background };

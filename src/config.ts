@@ -1,5 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { parseDocument, isScalar } from 'yaml';
+import { parseDocument } from 'yaml';
+import { fromOld, markOld, oldKeys } from './legacy.ts';
+import { ConfigError, background, check, emptyMappings, isMap, type Raw, type Shape } from './shape.ts';
+
+export { ConfigError };
 
 export const CARDS = ['summary', 'languages', 'contributions', 'weekly', 'streaks', 'about'] as const;
 export type Card = (typeof CARDS)[number];
@@ -31,7 +35,7 @@ export interface Config {
     animations: boolean;
     /**
      * Behind the cards: "none" lets the page show through; a colour ("#030506") is the same for every
-     * viewer, and the text takes the shades that suit it. "solid" only comes from the old settings: the
+     * viewer, and the text takes the shades that suit it. "solid" only comes from the old settings (legacy.ts): the
      * style's own (classic: GitHub's page colour, following the viewer; the displays: the colour's panel).
      */
     background: string;
@@ -94,10 +98,6 @@ export const DEFAULT_CONFIG: Config = {
   },
 };
 
-export class ConfigError extends Error {}
-
-type Shape = { [key: string]: 'boolean' | 'string' | 'string?' | 'number' | 'string[]' | 'weights' | 'strings' | Shape };
-
 const SHAPE: Shape = {
   user: 'string?',
   show: 'string[]',
@@ -113,60 +113,6 @@ const SHAPE: Shape = {
   },
 };
 
-/** The layout before v1.5, still read: everything at the top, the look spread over several keys. */
-const OLD_SHAPE: Shape = {
-  user: 'string?',
-  cards: 'string[]',
-  style: 'string',
-  matrix: 'boolean',
-  color: 'string',
-  background: 'string',
-  transparent: 'boolean',
-  include: { private: 'boolean', orgs: 'boolean' },
-  theme: { background: 'string', border: 'boolean', animations: 'boolean' },
-  summary: { title: 'string?', ring: 'string' },
-  languages: { title: 'string?', count: 'number', exclude: 'string[]', excludeRepos: 'string[]', repoWeights: 'weights', other: 'boolean' },
-  contributions: { title: 'string?', count: 'number', includeOpen: 'boolean', pin: 'string[]', hide: 'string[]' },
-  weekly: { title: 'string?' },
-  streaks: { title: 'string?' },
-  about: { title: 'string?', headline: 'string?', lines: 'string[]', facts: 'strings' },
-};
-
-function check(value: unknown, shape: Shape, path: string): void {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    throw new ConfigError(`${path || 'config'} must be a mapping`);
-  }
-  for (const [key, v] of Object.entries(value)) {
-    const where = path ? `${path}.${key}` : key;
-    const expected = shape[key];
-    if (expected === undefined) {
-      throw new ConfigError(`unknown setting "${where}"`);
-    }
-    if (typeof expected === 'object') {
-      check(v, expected, where);
-      continue;
-    }
-    const ok =
-      expected === 'boolean' ? typeof v === 'boolean'
-      : expected === 'string' ? typeof v === 'string'
-      : expected === 'string?' ? v === null || typeof v === 'string'
-      : expected === 'number' ? typeof v === 'number' && Number.isInteger(v) && v > 0
-      : expected === 'string[]' ? Array.isArray(v) && v.every((s) => typeof s === 'string')
-      : expected === 'strings' ? typeof v === 'object' && v !== null && !Array.isArray(v) && Object.values(v).every((s) => typeof s === 'string')
-      : typeof v === 'object' && v !== null && !Array.isArray(v) &&
-        Object.values(v).every((n) => typeof n === 'number' && n >= 0);
-    if (!ok) {
-      const what = expected === 'weights' ? 'a mapping of repo to a number >= 0'
-        : expected === 'strings' ? 'a mapping of label to text'
-        : expected === 'number' ? 'a positive whole number'
-        : expected === 'string[]' ? 'a list of strings'
-        : expected === 'string?' ? 'a string'
-        : `a ${expected}`;
-      throw new ConfigError(`"${where}" must be ${what}`);
-    }
-  }
-}
-
 function merge<T>(base: T, override: unknown): T {
   if (typeof override !== 'object' || override === null) return base;
   const out: Record<string, unknown> = { ...(base as Record<string, unknown>) };
@@ -181,80 +127,7 @@ function merge<T>(base: T, override: unknown): T {
   return out as T;
 }
 
-/**
- * The background as written: "none", or a colour of six (or three) hex digits, with or without "#".
- * It's read from the file's text, as YAML makes numbers of some colours: 030506 would be 30506.
- */
-function background(node: unknown, where: string): string {
-  const text = isScalar(node) ? String(node.source ?? node.value ?? '') : '';
-  if (!text) throw new ConfigError(`"${where}" is empty: write none, or a colour without #, like ${where.split('.').pop()}: 030506`);
-  const value = text.trim().toLowerCase().replace(/^#/, '');
-  if (value === 'none') return 'none';
-  if (/^([0-9a-f]{3}){1,2}$/.test(value)) return `#${value}`;
-  throw new ConfigError(`"${where}" must be none or a colour like 030506, not "${text}"`);
-}
-
-type Raw = Record<string, unknown>;
-const isMap = (v: unknown): v is Raw => typeof v === 'object' && v !== null && !Array.isArray(v);
-
-/**
- * A mapping written with nothing under it ("repos:") is null in YAML: taken as an empty one. setup
- * from v1.5.0 to v1.6.1 wrote "repos:" like that when it moved settings without repo weights.
- */
-function emptyMappings(value: unknown, shape: Shape): void {
-  if (!isMap(value)) return;
-  for (const [key, expected] of Object.entries(shape)) {
-    if (!(key in value)) continue;
-    if (typeof expected === 'object') emptyMappings(value[key], expected);
-    else if ((expected === 'weights' || expected === 'strings') && value[key] === null) value[key] = {};
-  }
-}
-
-/** Settings in the layout before v1.5, moved to the new one: the same cards, looking the same. */
-function fromOld(o: Raw): Raw {
-  check(o, OLD_SHAPE, '');
-  const theme = (o.theme ?? {}) as Raw;
-  const style = o.style ?? 'classic';
-  if (style !== 'classic' && style !== 'oled') throw new ConfigError('"style" must be "classic" or "oled"');
-  if (theme.background !== undefined && theme.background !== 'transparent' && theme.background !== 'solid') {
-    throw new ConfigError('"theme.background" must be "transparent" or "solid"');
-  }
-  const look: Raw = {
-    // oled was round LEDs unless matrix was false: now the dotmatrix style, and oled is the square pixels.
-    style: style === 'oled' ? (o.matrix === false ? 'oled' : 'dotmatrix') : 'classic',
-    // The displays were amber unless set; color: theme is github's old name.
-    color: o.color === 'theme' ? 'github' : (o.color ?? (style === 'oled' ? 'amber' : 'github')),
-    // Before background: the displays' dark panel unless transparent, GitHub's page colour behind classic if solid.
-    background: o.background ?? ((style === 'oled' ? o.transparent === false : theme.background === 'solid') ? 'solid' : 'none'),
-  };
-  if (theme.animations !== undefined) look.animations = theme.animations;
-  if (theme.border !== undefined) look.border = theme.border;
-  const out: Raw = { look };
-  if ('user' in o) out.user = o.user;
-  if ('cards' in o) out.show = o.cards;
-  if ('include' in o) out.count = o.include;
-  const cards: Raw = {};
-  for (const card of ['summary', 'weekly', 'streaks', 'about']) if (card in o) cards[card] = o[card];
-  if (isMap(o.languages)) {
-    const { exclude, excludeRepos, repoWeights, ...rest } = o.languages;
-    // Left out was the same as a weight of 0.
-    const repos = { ...((repoWeights as Raw) ?? {}), ...Object.fromEntries(((excludeRepos as string[]) ?? []).map((r) => [r, 0])) };
-    cards.languages = { ...rest, ...(exclude ? { hide: exclude } : {}), ...(excludeRepos || repoWeights ? { repos } : {}) };
-  }
-  if (isMap(o.contributions)) {
-    const { includeOpen, ...rest } = o.contributions;
-    cards.contributions = { ...rest, ...(includeOpen !== undefined ? { open: includeOpen } : {}) };
-  }
-  if (Object.keys(cards).length) out.cards = cards;
-  return out;
-}
-
-export const OLD_KEYS = ['style', 'matrix', 'color', 'background', 'transparent', 'include', 'theme', 'summary', 'languages', 'contributions', 'weekly', 'streaks', 'about'];
 export const NEW_KEYS = ['show', 'count', 'look'];
-
-/** Settings files in the layout before v1.5; they still work, and setup moves them to the new one. */
-const OLD_LAYOUT = new WeakSet<Config>();
-export const usesOldLayout = (config: Config): boolean => OLD_LAYOUT.has(config);
 
 export function parseConfig(text: string): Config {
   const doc = parseDocument(text);
@@ -263,18 +136,17 @@ export function parseConfig(text: string): Config {
   if (!isMap(parsed)) throw new ConfigError('config must be a mapping');
   let raw: Raw = parsed;
 
-  // The old layout had everything at the top, and the cards as a list.
-  const old = OLD_KEYS.filter((k) => k in raw).concat(Array.isArray(raw.cards) ? ['cards'] : []);
+  const old = oldKeys(raw);
   const current = NEW_KEYS.filter((k) => k in raw).concat(isMap(raw.cards) ? ['cards'] : []);
   if (old.length && current.length) {
     throw new ConfigError(`"${current[0]}" is in the new layout of the settings, "${old[0]}" in the old one: use the new one (run setup again to move them)`);
   }
-  emptyMappings(raw, old.length ? OLD_SHAPE : SHAPE);
-  if (old.length) {
-    if ('background' in raw) raw.background = background(doc.get('background', true), 'background');
-    raw = fromOld(raw);
-  } else if (isMap(raw.look) && 'background' in raw.look) {
-    (raw.look as Raw).background = background(doc.getIn(['look', 'background'], true), 'look.background');
+  if (old.length) raw = fromOld(raw, doc); // the layout before v1.5: see legacy.ts
+  else {
+    emptyMappings(raw, SHAPE);
+    if (isMap(raw.look) && 'background' in raw.look) {
+      (raw.look as Raw).background = background(doc.getIn(['look', 'background'], true), 'look.background');
+    }
   }
 
   check(raw, SHAPE, '');
@@ -294,7 +166,7 @@ export function parseConfig(text: string): Config {
   if (config.cards.summary.ring !== 'percent' && config.cards.summary.ring !== 'github') {
     throw new ConfigError('"cards.summary.ring" must be "percent" or "github"');
   }
-  if (old.length) OLD_LAYOUT.add(config);
+  if (old.length) markOld(config);
   return config;
 }
 
