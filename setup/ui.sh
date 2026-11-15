@@ -70,6 +70,10 @@ paint_frame() {
   FRAME_H="$(frame_height "$1")"
 }
 note() { printf '%s%s\n' "$INDENT" "$*"; }
+# The spinner's frames are setup.sh's; a setup.sh from before them (GitHub's cache can serve one for a
+# few minutes after a release) gets a plain one.
+[ -n "${SPINNER[*]:-}" ] || SPINNER=('-' "\\" '|' '/')
+spinner_frame() { paint 36 "${SPINNER[$(($1 % ${#SPINNER[@]}))]}"; } # spinner_frame n: frame n, wrapping
 report() { # report status text: green for done, yellow for skipped, red for what needs you
   local status
   status="$(printf '%-9s' "$1")"

@@ -30,12 +30,15 @@ cols=0
 $HAVE_TTY && cols="$(stty size < /dev/tty 2>/dev/null | awk '{print $2}')"
 
 # The star shows with the full screen, wide enough for the big title it sits beside; it asks when
-# GitHub says you haven't starred the repo.
-SHOW_STAR=false; ASK_STAR=false
+# GitHub says you haven't starred the repo. That's asked in the background: the title shows, its star
+# lit, without waiting for the answer.
+SHOW_STAR=false; ASK_STAR=false; STAR_PID=""; STAR_ANSWER=""
 $FANCY && [ "${cols:-0}" -ge 44 ] && SHOW_STAR=true
 if $SHOW_STAR && command -v gh >/dev/null; then
-  star_err="$(gh api "user/starred/$TOOL_REPO" --silent 2>&1 >/dev/null)" \
-    || case "$star_err" in *"HTTP 404"*) ASK_STAR=true ;; esac
+  STAR_ANSWER="$(mktemp)"
+  ( star_err="$(gh api "user/starred/$TOOL_REPO" --silent 2>&1 >/dev/null)" \
+    || case "$star_err" in *"HTTP 404"*) echo ask > "$STAR_ANSWER" ;; esac ) &
+  STAR_PID=$!
 fi
 
 TITLE=()
@@ -64,8 +67,18 @@ draw_banner() { # draw_banner ask|done: the title with the star beside it; with 
 }
 
 echo
+if $SHOW_STAR; then
+  frame="$(draw_banner "done")"
+  printf '%s\n' "$frame"
+  if [ -n "$STAR_PID" ]; then
+    wait "$STAR_PID" 2>/dev/null || true
+    if [ -s "$STAR_ANSWER" ]; then ASK_STAR=true; fi
+    rm -f "$STAR_ANSWER"
+  fi
+  # Not starred: the title again, over itself, now with the question.
+  if $ASK_STAR; then printf '\033[%dA' "$(frame_height "$frame")"; fi
+fi
 if $ASK_STAR; then
-  frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
   enter_hint="$(paint 2 'Enter to continue')"
   frame="$(draw_banner ask)"
   printf '%s\n' "$frame"
@@ -76,8 +89,8 @@ if $ASK_STAR; then
   stty -icanon min 0 time 1 < /dev/tty # a key, or nothing after a tenth of a second
   ticks=40 i=0                         # 4 seconds
   while [ "$ticks" -gt 0 ]; do
-    printf '\r  \033[36m%s\033[0m %s %d   %s\033[K' \
-      "${frames[$((i % 10))]}" "$doing" $(((ticks + 9) / 10)) "$enter_hint"
+    printf '\r  %s %s %d   %s\033[K' \
+      "$(spinner_frame "$i")" "$doing" $(((ticks + 9) / 10)) "$enter_hint"
     i=$((i + 1))
     k="$(dd bs=16 count=1 2>/dev/null < /dev/tty; echo .)"
     k="${k%.}"
@@ -102,7 +115,7 @@ if $ASK_STAR; then
     fi
   fi
 elif $SHOW_STAR; then
-  draw_banner "done" # starred already: the star, lit, and nothing to ask
+  : # starred already: the title is up, its star lit, and there's nothing to ask
 else
   for line in "${TITLE[@]}"; do printf '  %s\n' "$line"; done
   printf '  %s\n' "$(paint 2 "$TAGLINE")"

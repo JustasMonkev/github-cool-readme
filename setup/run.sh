@@ -6,11 +6,10 @@
 if ! $CARDS_OFF; then if $NEW_SETUP; then section "First run"; else section "Run"; fi; fi # with the cards off there is nothing to run
 wait_with_timer() { # wait_with_timer pid label: a spinner and the time taken, until pid ends; its exit status
   local pid="$1" start="$SECONDS" i=0 s
-  local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
   if $FANCY; then
     while kill -0 "$pid" 2>/dev/null; do
       s=$((SECONDS - start))
-      printf '\r  %s %s %d:%02d\033[K' "$(paint 36 "${frames[$((i % 10))]}")" "$2" $((s / 60)) $((s % 60))
+      printf '\r  %s %s %d:%02d\033[K' "$(spinner_frame "$i")" "$2" $((s / 60)) $((s % 60))
       i=$((i + 1))
       sleep 0.2
     done
