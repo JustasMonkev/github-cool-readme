@@ -50,6 +50,7 @@ describe('config', () => {
   });
 
   it('rejects wrong types and values', () => {
+    expect(() => parseConfig('cards:\n  languages:\n    count: 7\n')).toThrow('"cards.languages.count" must be at most 6, "Other" included');
     expect(() => parseConfig('cards:\n  languages:\n    count: six\n')).toThrow('"cards.languages.count" must be a positive whole number');
     expect(() => parseConfig('cards:\n  languages:\n    repos:\n      a: -1\n')).toThrow('cards.languages.repos');
     expect(() => parseConfig('look:\n  style: fancy\n')).toThrow('"look.style" must be "classic", "oled" or "dotmatrix"');

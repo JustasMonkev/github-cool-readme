@@ -15,5 +15,5 @@ CARD_NAMES="summary languages contributions weekly streaks about"
 DEFAULT_CARDS="summary languages contributions weekly" # on unless cool-readme.yml says otherwise
 LIST=show # the key of the list of cards: cards before v1.5, in a file setup couldn't move
 
-# Every card is shown 400 wide, so two fit a row: classic ones are that size, OLED ones are scaled.
+# Every card is shown 400 wide, so two fit a row: every card is 450 x 219, scaled.
 WIDTH=400

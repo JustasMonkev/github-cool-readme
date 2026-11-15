@@ -1,6 +1,6 @@
 import type { Config } from '../../config.ts';
 import { DAY_NAMES, weekdayFacts, type WeekdayItem } from '../../compute.ts';
-import { CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, WIDTH, card, esc, fadeIn, formatNumber, headerText, truncate, type Theme } from '../../render/svg.ts';
+import { CONTENT_TOP, PAD, SMALL, WIDTH, card, esc, fadeIn, formatNumber, headerText, truncate, type Theme } from '../../render/svg.ts';
 
 // The bars on the left, three numbers about them on the right, one under the other.
 const BASELINE = 166;
@@ -31,7 +31,7 @@ export function renderWeekly(days: WeekdayItem[], theme: Theme, config: Config):
 
   if (!max) {
     return card({
-      width: WIDTH, height: CARD_HEIGHT, title: title ?? 'Weekly rhythm', desc: 'No contributions in the last 12 months.', theme, config,
+      title: title ?? 'Weekly rhythm', desc: 'No contributions in the last 12 months.', theme, config,
       body: header + `<text x="${PAD}" y="${CONTENT_TOP + 14}" class="label muted">No contributions in the last 12 months</text>`,
     });
   }
@@ -80,8 +80,6 @@ export function renderWeekly(days: WeekdayItem[], theme: Theme, config: Config):
     : '';
 
   return card({
-    width: WIDTH,
-    height: CARD_HEIGHT,
     title: title ?? 'Weekly rhythm',
     desc:
       `Contributions per weekday over the last 12 months (${formatNumber(total)} in total): ` +

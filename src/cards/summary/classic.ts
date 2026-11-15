@@ -1,7 +1,7 @@
 import type { Config } from '../../config.ts';
 import type { CountKey, SummaryModel } from '../../compute.ts';
 import { icon, type IconName } from '../../render/icons.ts';
-import { CARD_HEIGHT, CONTENT_TOP, PAD, WIDTH, card, esc, fadeIn, formatNumber, headerText, type Theme } from '../../render/svg.ts';
+import { CONTENT_TOP, PAD, card, esc, fadeIn, formatNumber, headerText, type Theme } from '../../render/svg.ts';
 
 const ICONS: Record<CountKey, IconName> = {
   commits: 'git-commit',
@@ -25,7 +25,6 @@ export function renderSummary(m: SummaryModel, theme: Theme, config: Config): st
     { icon: 'star' as IconName, label: 'Stars earned', last12: formatNumber(m.stars.last12Months), all: formatNumber(m.stars.allTime) },
   ];
   const tableTop = CONTENT_TOP;
-  const height = tableTop + rows.length * ROW + 8;
 
   // One column of numbers, the last 12 months and all time in turn; without animations, all time.
   const turns = config.look.animations;
@@ -97,8 +96,6 @@ ${
   ].join(' ');
 
   return card({
-    width: WIDTH,
-    height: Math.max(CARD_HEIGHT, height, cy + RADIUS + 10),
     title: m.title ?? 'GitHub stats',
     desc,
     theme,

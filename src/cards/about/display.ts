@@ -5,7 +5,7 @@
 import type { Config } from '../../config.ts';
 import { marked, unmarked } from '../../render/svg.ts';
 import { textWidth } from '../../display/font.ts';
-import { COLS, H, W, drawDots, frame, type Style } from '../../display/dmd.ts';
+import { COLS, drawDots, frame, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
@@ -99,7 +99,7 @@ export function renderDisplayAbout(about: Config['cards']['about'], style: Style
   const show = slideshow('b', slides, { col: 0, row: 15, cols: COLS, rows: 56 }, look, ['type', 'wipe']);
 
   return frame({
-    width: W, height: H, title: title ?? 'About',
+    title: title ?? 'About',
     desc: [headline, ...lines, ...entries.map(([label, text]) => `${label}: ${text}`)].filter(Boolean).map((t) => unmarked(t!)).join(' ') || 'Nothing here yet.',
     ...style,
     css: show.css,

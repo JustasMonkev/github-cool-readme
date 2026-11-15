@@ -1,4 +1,5 @@
 import type { Config } from '../config.ts';
+import { H, W } from '../display/dmd.ts';
 import { PALETTE, THEMES, type Color, type Mode, type Theme } from '../palette.ts';
 
 export type { Theme } from '../palette.ts';
@@ -11,9 +12,10 @@ export function themeFor(mode: Mode, color: Color): Theme {
   return { ...THEMES[mode], ...tint, emphasis: tint.highlight };
 }
 
-// One size for every card: two side by side fill a profile README's 800px, shown at their real
-// size so the text isn't scaled down. Every card has the same header line: small uppercase text
-// (a title, column names) at HEADER_Y, with the content starting at CONTENT_TOP.
+// Every card is a W x H file, 450 x 219 like the displays, and is shown 400 wide in a README, so two
+// fill a profile's 800px. The classic cards are drawn on 400 x 195, the same shape: shown 400 wide,
+// their text is at its real size, not scaled down. Every card has the same header line: small
+// uppercase text (a title, column names) at HEADER_Y, with the content starting at CONTENT_TOP.
 export const WIDTH = 400;
 export const CARD_HEIGHT = 195;
 export const PAD = 20;
@@ -153,8 +155,6 @@ const ANIMATIONS = `
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }`;
 
 export interface CardOptions {
-  width: number;
-  height: number;
   title: string;
   desc: string;
   theme: Theme;
@@ -169,7 +169,7 @@ export function card(o: CardOptions): string {
   // "solid" only comes from settings in the layout before v1.5 (legacy.ts): GitHub's page colour, the viewer's.
   const bg = config.look.background === 'none' ? 'none' : config.look.background === 'solid' ? t.background : config.look.background;
   const stroke = config.look.border ? t.border : 'none';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${o.width}" height="${o.height}" viewBox="0 0 ${o.width} ${o.height}" fill="none" role="img" aria-labelledby="title desc">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${WIDTH} ${CARD_HEIGHT}" fill="none" role="img" aria-labelledby="title desc">
 <title id="title">${esc(o.title)}</title>
 <desc id="desc">${esc(o.desc)}</desc>
 <style>
@@ -182,7 +182,7 @@ export function card(o: CardOptions): string {
   .muted { fill: ${t.muted}; }
   .icon { fill: ${t.secondary}; }${config.look.animations ? ANIMATIONS : ''}${o.css ?? ''}
 </style>
-<rect x="0.5" y="0.5" width="${o.width - 1}" height="${o.height - 1}" rx="6" fill="${bg}" stroke="${stroke}"/>
+<rect x="0.5" y="0.5" width="${WIDTH - 1}" height="${CARD_HEIGHT - 1}" rx="6" fill="${bg}" stroke="${stroke}"/>
 ${o.body}
 </svg>
 `;

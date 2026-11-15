@@ -4,7 +4,7 @@ import type { ContributionItem } from '../../compute.ts';
 import { describe } from './classic.ts';
 import { formatCompact } from '../../render/svg.ts';
 import { textCells, textWidth } from '../../display/font.ts';
-import { COLS, H, W, drawDots, frame, path, type Style } from '../../display/dmd.ts';
+import { COLS, drawDots, frame, path, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
@@ -14,7 +14,7 @@ export function renderDisplayContributions(items: ContributionItem[], title: str
   const header = titleLine(title, look);
   if (!items.length) {
     return frame({
-      width: W, height: H, title: title ?? 'Notable contributions', desc: 'No contributions to other projects yet.', ...style, css: '',
+      title: title ?? 'Notable contributions', desc: 'No contributions to other projects yet.', ...style, css: '',
       body: header + path(textCells('NO CONTRIBUTIONS YET', 4, 24), look.lit),
     });
   }
@@ -34,7 +34,7 @@ export function renderDisplayContributions(items: ContributionItem[], title: str
   const show = slideshow('c', slides, { col: 0, row: 16, cols: COLS, rows: 51 }, look, ['push', 'type', 'wipe']);
 
   return frame({
-    width: W, height: H, title: title ?? 'Notable contributions',
+    title: title ?? 'Notable contributions',
     desc: items.map((i) => `${i.repo} (${i.stars} stars): ${describe(i)}`).join('. '),
     ...style,
     css: show.css,

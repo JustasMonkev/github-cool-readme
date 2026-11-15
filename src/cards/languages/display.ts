@@ -15,7 +15,7 @@ export function renderDisplayLanguages(items: LanguageItem[], title: string | nu
   const header = titleLine(title, look);
   if (!items.length) {
     return frame({
-      width: W, height: H, title: title ?? 'Languages', desc: 'No language data.', ...style, css: '',
+      title: title ?? 'Languages', desc: 'No language data.', ...style, css: '',
       body: header + path(textCells('NO DATA YET', 4, 24), look.lit),
     });
   }
@@ -49,7 +49,7 @@ export function renderDisplayLanguages(items: LanguageItem[], title: string | nu
   const barPart = path(bar, look.accent, 'fill-opacity="0.22"') + `<g mask="url(#lbar)">${path(bar, look.accent)}</g>`;
 
   return frame({
-    width: W, height: H, title: title ?? 'Most used languages',
+    title: title ?? 'Most used languages',
     desc: items.map((l) => `${l.name} ${l.percent.toFixed(1)}%`).join(', '),
     ...style,
     css: show.css + barCss,

@@ -74,10 +74,22 @@ describe('languages', () => {
     expect(shares(m)).toEqual({ Ruby: 57.1, C: 42.9 });
   });
 
-  it('folds the rest into Other', () => {
-    const m = compute(fixture(), config((c) => (c.cards.languages.count = 2)));
+  it('folds the rest into Other, which counts as one of the entries', () => {
+    const m = compute(fixture(), config((c) => (c.cards.languages.count = 3)));
     expect(shares(m)).toEqual({ Ruby: 34.3, C: 25.7, Other: 40 });
     expect(m.languages.at(-1)!.color).toBeNull();
+    // With count 1, one language and Other.
+    expect(shares(compute(fixture(), config((c) => (c.cards.languages.count = 1))))).toEqual({ Ruby: 34.3, Other: 65.7 });
+  });
+
+  it('has no Other when every language fits', () => {
+    expect(shares(compute(fixture(), config((c) => (c.cards.languages.count = 5))))).toEqual({ Ruby: 34.3, C: 25.7, Batchfile: 22.9, Rust: 14.3, Python: 2.9 });
+  });
+
+  it('shows the next language instead of an Other under 0.5%', () => {
+    // With game's weight down, its C and Python are together under 0.5%: C takes the last place.
+    const m = compute(fixture(), config((c) => { c.cards.languages.count = 4; c.cards.languages.repos = { game: 0.01 }; }));
+    expect(m.languages.map((l) => l.name)).toEqual(['Ruby', 'Batchfile', 'Rust', 'C']);
   });
 });
 
