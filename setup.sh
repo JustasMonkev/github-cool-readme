@@ -365,7 +365,7 @@ migrate_config() { # migrate_config file
         emit(h == "" ? "" : ind h)
       }
     }
-    function languages(i,   j, s, ci, k, v, n, it, kv, x, done, nw, wk, wv, ne, ex, seen) {
+    function languages(i,   j, s, ci, k, v, n, it, kv, x, done, nw, wk, wv, ne, ex, seen, nr) {
       # exclude becomes hide; excludeRepos and repoWeights become repos, left out being a weight of 0.
       v = rest(head[i])
       if (v ~ /^\{/) {
@@ -405,7 +405,11 @@ migrate_config() { # migrate_config file
         k = trim(s); sub(/:.*/, "", k)
         if (indent(s) == ci && (k == "excludeRepos" || k == "repoWeights")) {
           if (!done++) {
-            emit("  " ci "repos:")
+            nr = ne
+            for (x = 1; x <= nw; x++) if (!(tolower(unq(wk[x])) in seen)) nr++
+            # Nothing to move ("excludeRepos: []", "repoWeights: {}"): an empty mapping, not "repos:" with nothing under it.
+            if (!nr) emit("  " ci "repos: {}")
+            else emit("  " ci "repos:")
             for (x = 1; x <= nw; x++) if (!(tolower(unq(wk[x])) in seen)) emit("  " ci ci wk[x] ": " wv[x])
             for (x = 1; x <= ne; x++) emit("  " ci ci ex[x] ": 0")
           }

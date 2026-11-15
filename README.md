@@ -255,6 +255,12 @@ npm run test:update                     # accept the changes: commit the new has
 
 CI runs the same on every push and pull request, and attaches the review page to the run as `card-review` when cards changed.
 
+### Settings that keep working
+
+`tests/compat/` holds every settings example released with v1 (the README's and `examples/cool-readme.yml`, from each tag), and one setup wrote. Each must still be read, and read the same way (`tests/compat/parsed.json`); the old-layout ones must also come out of setup's move to the new layout making the same cards. When the documented settings change, add the new example there.
+
+setup.sh keeps its own copies of the cards, styles, colours, panels and titles, as it needs nothing but bash; `tests/setup-sync.test.ts` fails when they drift from the TypeScript.
+
 ## License
 
 MIT
