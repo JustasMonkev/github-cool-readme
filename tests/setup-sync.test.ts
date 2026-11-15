@@ -1,6 +1,6 @@
-// setup.sh runs on users' machines with nothing but bash, so it keeps its own copies of a few
+// Setup runs on users' machines with nothing but bash, so it keeps its own copies of a few
 // things the TypeScript defines: the cards, styles and colours, the display panels' colours, the
-// cards' titles. These tests read them out of setup.sh and fail when the two drift apart.
+// cards' titles. These tests read them out of its steps (setup/) and fail when the two drift apart.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { CARDS, COLORS, DEFAULT_CARDS, DEFAULT_CONFIG, NEW_KEYS, OLD_KEYS, STYLES } from '../src/config.ts';
@@ -8,17 +8,25 @@ import { look } from '../src/display/dmd.ts';
 import { cardWidths } from '../src/render/index.ts';
 import { THEMES } from '../src/render/svg.ts';
 
-const setup = readFileSync('setup.sh', 'utf8');
+/** Every step of setup, in the order setup.sh runs them (its SETUP_BLOCKS). */
+const blocks = readFileSync('setup.sh', 'utf8').match(/^SETUP_BLOCKS=\(\n([\s\S]*?)^\)$/m)?.[1];
+if (!blocks) throw new Error('setup.sh no longer has SETUP_BLOCKS: update this test along with it');
+const setup = blocks
+  .split('\n')
+  .map((line) => line.replace(/#.*/, '').trim())
+  .filter(Boolean)
+  .map((block) => readFileSync(`setup/${block}.sh`, 'utf8'))
+  .join('\n');
 
-/** The first group of `re` in setup.sh; fails, naming it, when setup.sh no longer has it. */
+/** The first group of `re` in setup's steps; fails, naming it, when they no longer have it. */
 function find(re: RegExp): string {
   const m = setup.match(re);
-  if (!m) throw new Error(`setup.sh no longer has ${re}: update this test along with it`);
+  if (!m) throw new Error(`setup/ no longer has ${re}: update this test along with it`);
   return m[1];
 }
 const words = (re: RegExp) => find(re).split(' ');
 
-describe('setup.sh agrees with the TypeScript on', () => {
+describe('setup agrees with the TypeScript on', () => {
   it('the cards, and which are on by default', () => {
     expect(words(/^CARD_NAMES="([^"]+)"/m)).toEqual([...CARDS]);
     expect(words(/^DEFAULT_CARDS="([^"]+)"/m)).toEqual(DEFAULT_CARDS);

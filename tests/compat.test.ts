@@ -40,11 +40,9 @@ describe('every released settings example', () => {
   });
 });
 
-// setup.sh moves settings in the layout from before v1.5 to the new one, in bash (setup needs
+// Setup moves settings in the layout from before v1.5 to the new one, in bash (setup needs
 // nothing else). The action still reads both, so the cards must not change when setup moves them.
-describe("setup.sh's move to the new layout", () => {
-  const setup = readFileSync('setup.sh', 'utf8');
-  const migrator = setup.match(/^migrate_config\(\) \{[\s\S]*?^\}$/m)?.[0];
+describe("setup's move to the new layout", () => {
   const temp = mkdtempSync(join(tmpdir(), 'cool-readme-compat-'));
   afterAll(() => rmSync(temp, { recursive: true, force: true }));
 
@@ -53,14 +51,12 @@ describe("setup.sh's move to the new layout", () => {
     const path = join(temp, 'cool-readme.yml');
     writeFileSync(path, text);
     try {
-      execFileSync('bash', ['-c', `${migrator}\nmigrate_config "$1"`, 'bash', path], { stdio: 'pipe' });
+      execFileSync('bash', ['-c', '. setup/migrate.sh; migrate_config "$1"', 'bash', path], { stdio: 'pipe' });
       return { status: 0, text: readFileSync(path, 'utf8') };
     } catch (err) {
       return { status: (err as { status: number }).status, text: readFileSync(path, 'utf8') };
     }
   };
-
-  it('is found in setup.sh', () => expect(migrator).toBeDefined());
 
   const old = files.filter((file) => usesOldLayout(parseConfig(read(file))));
   const current = files.filter((file) => !old.includes(file));
