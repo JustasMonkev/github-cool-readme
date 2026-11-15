@@ -122,17 +122,13 @@ export function dotsPath(cells: Cell[]): string {
 }
 
 export const DOT_SIZE = 2.4; // diameter of an LED, in a 3px cell
-let roundDots = false;
-/** Draw cells as round LEDs (the matrix) or as square pixels, for the card being rendered. */
-export function drawDots(on: boolean): void {
-  roundDots = on;
-}
 const dotted = (stroke: string) =>
   `fill="none" stroke="${stroke}" stroke-width="${DOT_SIZE}" stroke-linecap="round" stroke-dasharray="0 ${PITCH}"`;
 
-export function path(cells: Cell[], fill: string, attrs = ''): string {
+/** Cells in `fill`, as the style draws them: round LEDs (dot matrix) or square pixels (OLED). */
+export function path(style: Style, cells: Cell[], fill: string, attrs = ''): string {
   if (!cells.length) return '';
-  if (!roundDots) return `<path d="${cellsPath(cells)}" fill="${fill}"${attrs ? ' ' + attrs : ''}/>`;
+  if (!style.dots) return `<path d="${cellsPath(cells)}" fill="${fill}"${attrs ? ' ' + attrs : ''}/>`;
   const a = attrs.replace(/fill-opacity=/g, 'stroke-opacity=');
   return `<path d="${dotsPath(cells)}" ${dotted(fill)}${a ? ' ' + a : ''}/>`;
 }

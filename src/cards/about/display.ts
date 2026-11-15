@@ -5,7 +5,7 @@
 import type { Config } from '../../config.ts';
 import { marked, unmarked } from '../../render/svg.ts';
 import { textWidth } from '../../display/font.ts';
-import { COLS, drawDots, frame, type Style } from '../../display/dmd.ts';
+import { COLS, frame, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
@@ -83,9 +83,8 @@ function centred(...blocks: { items: Item[]; rows: number }[]): Item[] {
 
 export function renderDisplayAbout(about: Config['cards']['about'], style: Style): string {
   const { look } = style;
-  drawDots(style.dots);
   const { title, headline, lines, facts } = about;
-  const header = titleLine(title, look);
+  const header = titleLine(title, style);
   const entries = Object.entries(facts);
 
   const one = look.lit === look.accent;
@@ -96,7 +95,7 @@ export function renderDisplayAbout(about: Config['cards']['about'], style: Style
     slides.push(centred({ items: [{ text: fit(label.toUpperCase(), WIDE), col: 4, row: 0, dim: true }], rows: 7 }, block(text, one)));
   }
   if (!slides.length) slides.push(centred(block('Nothing here yet', one)));
-  const show = slideshow('b', slides, { col: 0, row: 15, cols: COLS, rows: 56 }, look, ['type', 'wipe']);
+  const show = slideshow('b', slides, { col: 0, row: 15, cols: COLS, rows: 56 }, style, ['type', 'wipe']);
 
   return frame({
     title: title ?? 'About',

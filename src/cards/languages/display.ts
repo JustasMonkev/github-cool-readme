@@ -2,7 +2,7 @@
 
 import type { LanguageItem } from '../../compute.ts';
 import { textCells, textWidth } from '../../display/font.ts';
-import { COLS, H, PITCH, W, drawDots, frame, keyframes, path, type Cell, type Style } from '../../display/dmd.ts';
+import { COLS, H, PITCH, W, frame, keyframes, path, type Cell, type Style } from '../../display/dmd.ts';
 import { ENTER, HOLD, slideshow, type Item } from '../../display/slides.ts';
 import { fit, titleLine } from '../../display/text.ts';
 
@@ -11,12 +11,11 @@ const px = (cells: number) => cells * PITCH;
 
 export function renderDisplayLanguages(items: LanguageItem[], title: string | null, style: Style): string {
   const { look } = style;
-  drawDots(style.dots);
-  const header = titleLine(title, look);
+  const header = titleLine(title, style);
   if (!items.length) {
     return frame({
       title: title ?? 'Languages', desc: 'No language data.', ...style, css: '',
-      body: header + path(textCells('NO DATA YET', 4, 24), look.lit),
+      body: header + path(style, textCells('NO DATA YET', 4, 24), look.lit),
     });
   }
 
@@ -29,7 +28,7 @@ export function renderDisplayLanguages(items: LanguageItem[], title: string | nu
       { text: `${l.percent.toFixed(1)}%`, col: 4, row: 32, scale: 2, shine: true },
     ];
   });
-  const show = slideshow('l', slides, { col: 0, row: 18, cols: COLS, rows: 31 }, look, ['push', 'wipe']);
+  const show = slideshow('l', slides, { col: 0, row: 18, cols: COLS, rows: 31 }, style, ['push', 'wipe']);
 
   // One bar for all languages: it grows or shrinks to each language's share, a dot at a time.
   const bar: Cell[] = [];
@@ -46,7 +45,7 @@ export function renderDisplayLanguages(items: LanguageItem[], title: string | nu
   const rest = `translate(${px(BAR.col)} 0) scale(${widths[0] / BAR.cols} 1) translate(-${px(BAR.col)} 0)`;
   const barDefs = `<mask id="lbar" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect class="lbar" x="${px(BAR.col)}" y="0" width="${px(BAR.cols)}" height="${H}" fill="#fff" transform="${rest}"/></mask>`;
   const barCss = `\n  .lbar { transform-box: fill-box; transform-origin: left; animation: lbar ${show.total}s infinite; }` + keyframes('lbar', show.total, frames);
-  const barPart = path(bar, look.accent, 'fill-opacity="0.22"') + `<g mask="url(#lbar)">${path(bar, look.accent)}</g>`;
+  const barPart = path(style, bar, look.accent, 'fill-opacity="0.22"') + `<g mask="url(#lbar)">${path(style, bar, look.accent)}</g>`;
 
   return frame({
     title: title ?? 'Most used languages',

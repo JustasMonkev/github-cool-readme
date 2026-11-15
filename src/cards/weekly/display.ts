@@ -4,7 +4,7 @@
 
 import { weekdayFacts, type WeekdayItem } from '../../compute.ts';
 import { textCells, textWidth } from '../../display/font.ts';
-import { H, PITCH, W, drawDots, frame, keyframes, maskPath, path, type Cell, type Style } from '../../display/dmd.ts';
+import { H, PITCH, W, frame, keyframes, maskPath, path, type Cell, type Style } from '../../display/dmd.ts';
 import { titleLine } from '../../display/text.ts';
 import { sparkleTiles } from '../../display/slides.ts';
 
@@ -23,13 +23,12 @@ const GROUPS = 6;
 
 export function renderDisplayWeekly(days: WeekdayItem[], title: string | null, style: Style): string {
   const { look } = style;
-  drawDots(style.dots);
-  const header = titleLine(title, look);
+  const header = titleLine(title, style);
   const max = Math.max(0, ...days.map((d) => d.count));
   if (!max) {
     return frame({
       title: title ?? 'Weekly rhythm', desc: 'No contributions in the last 12 months.', ...style, css: '',
-      body: header + path(textCells('NO ACTIVITY YET', 4, 32), look.lit),
+      body: header + path(style, textCells('NO ACTIVITY YET', 4, 32), look.lit),
     });
   }
 
@@ -95,7 +94,7 @@ export function renderDisplayWeekly(days: WeekdayItem[], title: string | null, s
       `Busiest: ${facts.busiest.day}. Quietest: ${facts.quietest.day}. On weekdays: ${facts.weekdays}%.`,
     ...style, css,
     body:
-      `<defs>${patterns}${sparkle}</defs>\n${header}\n<g mask="url(#wsp)">${path(bars, look.accent)}` +
-      `${path(labels, look.lit, `fill-opacity="${look.dim}"`)}${path(values, look.lit)}${path(names, look.lit, `fill-opacity="${look.dim}"`)}</g>`,
+      `<defs>${patterns}${sparkle}</defs>\n${header}\n<g mask="url(#wsp)">${path(style, bars, look.accent)}` +
+      `${path(style, labels, look.lit, `fill-opacity="${look.dim}"`)}${path(style, values, look.lit)}${path(style, names, look.lit, `fill-opacity="${look.dim}"`)}</g>`,
   });
 }

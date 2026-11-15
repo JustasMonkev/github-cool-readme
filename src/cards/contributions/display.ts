@@ -4,18 +4,17 @@ import type { ContributionItem } from '../../compute.ts';
 import { describe } from './classic.ts';
 import { formatCompact } from '../../render/svg.ts';
 import { textCells, textWidth } from '../../display/font.ts';
-import { COLS, drawDots, frame, path, type Style } from '../../display/dmd.ts';
+import { COLS, frame, path, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
 export function renderDisplayContributions(items: ContributionItem[], title: string | null, style: Style): string {
   const { look } = style;
-  drawDots(style.dots);
-  const header = titleLine(title, look);
+  const header = titleLine(title, style);
   if (!items.length) {
     return frame({
       title: title ?? 'Notable contributions', desc: 'No contributions to other projects yet.', ...style, css: '',
-      body: header + path(textCells('NO CONTRIBUTIONS YET', 4, 24), look.lit),
+      body: header + path(style, textCells('NO CONTRIBUTIONS YET', 4, 24), look.lit),
     });
   }
 
@@ -31,7 +30,7 @@ export function renderDisplayContributions(items: ContributionItem[], title: str
       { text: fit(describe(item).toUpperCase(), COLS - 8), col: 4, row: 57, dim: true },
     ];
   });
-  const show = slideshow('c', slides, { col: 0, row: 16, cols: COLS, rows: 51 }, look, ['push', 'type', 'wipe']);
+  const show = slideshow('c', slides, { col: 0, row: 16, cols: COLS, rows: 51 }, style, ['push', 'type', 'wipe']);
 
   return frame({
     title: title ?? 'Notable contributions',
