@@ -9,6 +9,8 @@ import { CARD_HEIGHT, PAD, truncate } from '../src/render/classic.ts';
 import { formatCompact } from '../src/text.ts';
 import { renderLanguages } from '../src/cards/languages/classic.ts';
 import { MAX_LANGUAGES } from '../src/cards/languages/index.ts';
+import { renderRepos } from '../src/cards/repos/classic.ts';
+import { MAX_REPOS } from '../src/cards/repos/index.ts';
 import { fixture } from './fixtures/snapshot.ts';
 
 /** Minimal well-formedness check: every opened tag is closed in order. */
@@ -73,6 +75,15 @@ describe('cards', () => {
     const rows = [...svg.matchAll(/<g transform="translate\(\d+(?:\.\d+)? (\d+(?:\.\d+)?)\)"><g class="fade"/g)].map((m) => Number(m[1]));
     expect(rows).toHaveLength(MAX_LANGUAGES);
     expect(Math.max(...rows) + 12).toBeLessThanOrEqual(CARD_HEIGHT - PAD);
+  });
+
+  it('fits the most repos there can be, with room below them', () => {
+    const items = Array.from({ length: MAX_REPOS }, (_, i) => ({ name: `repo-${i}`, stars: 1000 - i, recent: 10, language: null }));
+    const svg = renderRepos(items, THEMES.light, DEFAULT_CONFIG);
+    // Each entry is a name and a line under it, 34px tall, at its row's y; below the last, the card's padding.
+    const rows = [...svg.matchAll(/<g transform="translate\(\d+(?:\.\d+)? (\d+(?:\.\d+)?)\)"><g class="fade"/g)].map((m) => Number(m[1]));
+    expect(rows).toHaveLength(MAX_REPOS);
+    expect(Math.max(...rows) + 34).toBeLessThanOrEqual(CARD_HEIGHT - PAD);
   });
 
   it('draws every display card in dots, with no text set in a font', () => {

@@ -168,9 +168,11 @@ describe('about', () => {
 
 describe('the new cards', () => {
   it('are off unless listed', () => {
-    expect(CARD_DEFS.filter((c) => !c.on).map((c) => c.name)).toEqual(['streaks', 'about']);
+    const off = CARD_DEFS.filter((c) => !c.on).map((c) => c.name);
+    expect(off).toEqual(expect.arrayContaining(['streaks', 'about']));
+    // Like every card that's off: not made unless listed.
     const made = Object.keys(renderAll(compute(fixture(), DEFAULT_CONFIG), DEFAULT_CONFIG));
-    for (const card of ['streaks', 'about']) expect(made).not.toContain(`${card}-light.svg`);
+    for (const card of off) expect(made).not.toContain(`${card}-light.svg`);
   });
 
   it('come as dot-matrix displays with the oled style, the shape of the others', () => {
