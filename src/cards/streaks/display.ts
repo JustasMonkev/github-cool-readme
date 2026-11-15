@@ -4,7 +4,7 @@
 
 import type { StreakDays, Tile } from '../../stats.ts';
 import { textWidth } from '../../display/font.ts';
-import { COLS, drawDots, frame, path, type Cell, type Style } from '../../display/dmd.ts';
+import { COLS, frame, path, type Cell, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
@@ -48,8 +48,7 @@ function strip(sd: StreakDays, start: number, lit: Lit, accent: string, line?: n
 
 export function renderDisplayStreaks(tiles: Tile[], sd: StreakDays, title: string | null, style: Style): string {
   const { look } = style;
-  drawDots(style.dots);
-  const header = titleLine(title, look);
+  const header = titleLine(title, style);
   const n = sd.days.length;
   const recent = Math.max(0, n - STRIP_DAYS);
   const within = (range: [number, number] | null): Lit => (i) => !!range && i >= range[0] && i <= range[1];
@@ -82,7 +81,7 @@ export function renderDisplayStreaks(tiles: Tile[], sd: StreakDays, title: strin
     if (detail) items.push({ text: fit(detail.toUpperCase(), COLS - 8), col: 4, row: 45, dim: true });
     return items;
   });
-  const show = slideshow('s', slides, { col: 0, row: 14, cols: COLS, rows: 52 }, look, ['push', 'wipe', 'flash']);
+  const show = slideshow('s', slides, { col: 0, row: 14, cols: COLS, rows: 52 }, style, ['push', 'wipe', 'flash']);
 
   // The baseline under the strips stays put.
   const base: Cell[] = [];
@@ -93,6 +92,6 @@ export function renderDisplayStreaks(tiles: Tile[], sd: StreakDays, title: strin
     desc: tiles.map((t) => `${t.label}: ${t.value}`).join('. ') + '.',
     ...style,
     css: show.css,
-    body: `<defs>${show.defs}</defs>\n${header}\n${show.markup}\n${path(base, look.accent, 'fill-opacity="0.22"')}`,
+    body: `<defs>${show.defs}</defs>\n${header}\n${show.markup}\n${path(style, base, look.accent, 'fill-opacity="0.22"')}`,
   });
 }

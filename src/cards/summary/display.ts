@@ -3,7 +3,7 @@
 import { createRequire } from 'node:module';
 import type { SummaryModel } from '../../compute.ts';
 import { textCells, textWidth } from '../../display/font.ts';
-import { H, PITCH, TITLE_ROW, W, drawDots, frame, path, ringCells, type Style } from '../../display/dmd.ts';
+import { H, PITCH, TITLE_ROW, W, frame, path, ringCells, type Style } from '../../display/dmd.ts';
 import { rasterize } from '../../display/raster.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
@@ -18,7 +18,6 @@ const px = (cells: number) => cells * PITCH;
 
 export function renderDisplaySummary(m: SummaryModel, style: Style): string {
   const { look } = style;
-  drawDots(style.dots);
   const stats = [
     ...m.rows.map((r) => ({ label: r.label.toUpperCase(), year: r.last12Months, total: r.allTime })),
     { label: 'STARS EARNED', year: m.stars.last12Months, total: m.stars.allTime },
@@ -29,7 +28,7 @@ export function renderDisplaySummary(m: SummaryModel, style: Style): string {
     { text: fmt(s.year), col: 4, row: 23, scale: 2, shine: true },
     { text: `TOTAL ${fmt(s.total)}`, col: 4, row: 45, dim: true },
   ]);
-  const show = slideshow('a', slides, { col: 0, row: 1, cols: 80, rows: 71 }, look); // every effect
+  const show = slideshow('a', slides, { col: 0, row: 1, cols: 80, rows: 71 }, style); // every effect
 
   // The ring: always on, filling up once to the share of active days. Its title is above it.
   const cx = 113.5;
@@ -47,12 +46,12 @@ export function renderDisplaySummary(m: SummaryModel, style: Style): string {
   const title = logo ? `${pct} ACTIVE` : 'ACTIVE DAYS';
   // The mark is a circle cut off at the bottom; in its 24-unit drawing that circle's centre is (12, 12.5).
   const centre = logo
-    ? path(rasterize(MARK, 24, LOGO, Math.round(cx - (12 * LOGO) / 24), Math.round(cy - (12.5 * LOGO) / 24)), look.lit)
-    : path(textCells(pct, Math.round(cx - textWidth(pct)), Math.round(cy - 7), 2), look.lit);
+    ? path(style, rasterize(MARK, 24, LOGO, Math.round(cx - (12 * LOGO) / 24), Math.round(cy - (12.5 * LOGO) / 24)), look.lit)
+    : path(style, textCells(pct, Math.round(cx - textWidth(pct)), Math.round(cy - 7), 2), look.lit);
   const ringPart =
-    path(textCells(title, Math.round(cx - textWidth(title) / 2), TITLE_ROW), look.lit, `fill-opacity="${look.dim}"`) +
-    path(ring, look.accent, 'fill-opacity="0.22"') +
-    `<g mask="url(#fill)">${path(ring, look.accent)}</g>` +
+    path(style, textCells(title, Math.round(cx - textWidth(title) / 2), TITLE_ROW), look.lit, `fill-opacity="${look.dim}"`) +
+    path(style, ring, look.accent, 'fill-opacity="0.22"') +
+    `<g mask="url(#fill)">${path(style, ring, look.accent)}</g>` +
     centre;
 
   const desc = [
