@@ -28,7 +28,7 @@ export function renderDisplayWeekly(days: WeekdayItem[], title: string | null, s
   const max = Math.max(0, ...days.map((d) => d.count));
   if (!max) {
     return frame({
-      width: W, height: H, title: title ?? 'Weekly rhythm', desc: 'No contributions in the last 12 months.', ...style, css: '',
+      title: title ?? 'Weekly rhythm', desc: 'No contributions in the last 12 months.', ...style, css: '',
       body: header + path(textCells('NO ACTIVITY YET', 4, 32), look.lit),
     });
   }
@@ -89,7 +89,7 @@ export function renderDisplayWeekly(days: WeekdayItem[], title: string | null, s
   });
 
   return frame({
-    width: W, height: H, title: title ?? 'Weekly rhythm',
+    title: title ?? 'Weekly rhythm',
     desc:
       `Contributions per weekday over the last 12 months: ${days.map((d) => `${d.day} ${d.count}`).join(', ')}. ` +
       `Busiest: ${facts.busiest.day}. Quietest: ${facts.quietest.day}. On weekdays: ${facts.weekdays}%.`,

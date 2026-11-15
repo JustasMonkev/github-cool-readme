@@ -33,7 +33,7 @@ export function renderAll(model: Model, config: Config): Record<string, string> 
   return files;
 }
 
-/** The width each card is shown at in a README: 400, so two fit a row. Classic cards are 400 wide; OLED ones are 450, scaled. */
+/** The width each card is shown at in a README: 400, so two fit a row. Every card is 450 wide, scaled. */
 export function cardWidths(_config: Config): Record<string, number> {
   return Object.fromEntries(CARDS.map((card) => [card, 400]));
 }

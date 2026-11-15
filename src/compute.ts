@@ -177,17 +177,21 @@ export function compute(snapshot: Snapshot, config: Config): Model {
     }
   }
   const ranked = [...scores.entries()].sort((a, b) => b[1].score - a[1].score);
+  const sum = (from: number, to = ranked.length) => ranked.slice(from, to).reduce((s, [, e]) => s + e.score, 0);
+  // count is the entries shown, "Other" included: with more languages than that, the last place is
+  // "Other"'s, unless the rest is under 0.5%. With count 1, one language and "Other".
+  const whole = sum(0);
+  const folded = lc.other && ranked.length > lc.count ? Math.max(1, lc.count - 1) : lc.count;
+  const other = lc.other && whole > 0 && (sum(folded) / whole) * 100 >= 0.5;
+  const named = other ? folded : lc.count;
   // Without "Other", the languages shown share 100% between them, so the bar stays full.
-  const total = (lc.other ? ranked : ranked.slice(0, lc.count)).reduce((s, [, e]) => s + e.score, 0);
-  const languages: LanguageItem[] = ranked.slice(0, lc.count).map(([name, e]) => ({
+  const total = lc.other ? whole : sum(0, named);
+  const languages: LanguageItem[] = ranked.slice(0, named).map(([name, e]) => ({
     name,
     color: e.color,
     percent: total ? (e.score / total) * 100 : 0,
   }));
-  const rest = ranked.slice(lc.count).reduce((s, [, e]) => s + e.score, 0);
-  if (lc.other && total && (rest / total) * 100 >= 0.5) {
-    languages.push({ name: 'Other', color: null, percent: (rest / total) * 100 });
-  }
+  if (other) languages.push({ name: 'Other', color: null, percent: (sum(named) / total) * 100 });
 
   // Notable contributions: merged (and optionally open) pull requests to public repos of other
   // people and organizations. Pull requests closed without merging never count.

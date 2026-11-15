@@ -88,9 +88,9 @@ describe('streaks', () => {
     expect(still).toContain('transform="translate(374 0) scale(6 1)"'); // over its days
   });
 
-  it('is a 400 by 195 card', () => {
+  it('is a 450 by 219 card', () => {
     const svg = render('streaks');
-    expect(svg).toMatch(/<svg [^>]*width="400" height="195"/);
+    expect(svg).toMatch(/<svg [^>]*width="450" height="219"/);
     expect(svg).toContain('STREAKS');
     expect(svg).toContain('Longest streak');
   });
@@ -105,10 +105,10 @@ describe('about', () => {
     expect(() => parseConfig('about:\n  facts: { Focus: 3 }\n')).toThrow('"about.facts" must be a mapping of label to text');
   });
 
-  it('shows the headline, the lines and the facts on a 400 by 195 card', () => {
+  it('shows the headline, the lines and the facts on a 450 by 219 card', () => {
     const svg = render('about', (c) => { c.cards.about.headline = 'Hello'; c.cards.about.lines = ['Line one']; c.cards.about.facts = { Focus: 'Tools' }; });
     for (const text of ['Hello', 'Line one', 'FOCUS', 'Tools']) expect(svg).toContain(text);
-    expect(svg).toMatch(/<svg [^>]*width="400" height="195"/);
+    expect(svg).toMatch(/<svg [^>]*width="450" height="219"/);
   });
 
   it('scrolls the lines that don\'t fit slowly up to the last, then crossfades back to the start, the headline staying', () => {

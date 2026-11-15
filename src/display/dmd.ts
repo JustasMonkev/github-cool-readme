@@ -5,8 +5,8 @@ import { PALETTE, THEMES, type Color, type Mode } from '../palette.ts';
 
 export const PITCH = 3;
 
-// Every display card has the same size: 150 x 73 cells, 450 x 219, the classic cards' shape:
-// shown 400 wide, both are 400 x 195.
+// Every display card is 150 x 73 cells, 450 x 219: the size of every card, classic ones too
+// (svg.ts).
 export const COLS = 150;
 export const ROWS = 73;
 export const W = COLS * PITCH; // 450
@@ -177,8 +177,6 @@ export interface Style {
 }
 
 export interface FrameOptions {
-  width: number;
-  height: number;
   title: string;
   desc: string;
   look: Look;
@@ -191,15 +189,15 @@ export interface FrameOptions {
 
 export function frame(o: FrameOptions): string {
   const { look: l } = o;
-  const panel = o.background ? `<rect x="0.5" y="0.5" width="${o.width - 1}" height="${o.height - 1}" rx="8" fill="${o.background}"/>` : '';
+  const panel = o.background ? `<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="8" fill="${o.background}"/>` : '';
   // The unlit LEDs: one dotted line per row, faint. No masks or filters: Safari blurs those in images.
   let unlit = '';
   if (o.dots) {
     const rows: string[] = [];
-    for (let y = PITCH / 2; y < o.height; y += PITCH) rows.push(`M${PITCH / 2} ${y}h${Math.floor(o.width / PITCH - 1) * PITCH + PITCH / 2}`);
+    for (let y = PITCH / 2; y < H; y += PITCH) rows.push(`M${PITCH / 2} ${y}h${(COLS - 1) * PITCH + PITCH / 2}`);
     unlit = `<path d="${rows.join('')}" ${dotted(l.unlit)} stroke-opacity="${l.unlitOpacity}"/>`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${o.width}" height="${o.height}" viewBox="0 0 ${o.width} ${o.height}" fill="none" role="img" aria-labelledby="title desc">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none" role="img" aria-labelledby="title desc">
 <title id="title">${esc(o.title)}</title>
 <desc id="desc">${esc(o.desc)}</desc>
 <style>

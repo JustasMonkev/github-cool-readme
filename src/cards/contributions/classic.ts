@@ -2,7 +2,7 @@ import type { Config } from '../../config.ts';
 import type { ContributionItem } from '../../compute.ts';
 import { icon } from '../../render/icons.ts';
 import {
-  CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, TEXT, WIDTH, card, pageOffsets as pages, scrolling, esc, fadeIn, formatCompact, formatMonth, headerText, plural,
+  CONTENT_TOP, PAD, SMALL, TEXT, WIDTH, card, pageOffsets as pages, scrolling, esc, fadeIn, formatCompact, formatMonth, headerText, plural,
   textWidth, truncate, type Theme,
 } from '../../render/svg.ts';
 
@@ -28,7 +28,7 @@ export function renderContributions(items: ContributionItem[], theme: Theme, con
   const header = title ? headerText(title, PAD) : '';
   if (!items.length) {
     return card({
-      width: WIDTH, height: CARD_HEIGHT, title: title ?? 'Notable contributions', desc: 'No contributions to other projects yet.', theme, config,
+      title: title ?? 'Notable contributions', desc: 'No contributions to other projects yet.', theme, config,
       body: header + `<text x="${PAD}" y="${CONTENT_TOP + 14}" class="label muted">No contributions to other projects yet</text>`,
     });
   }
@@ -74,8 +74,6 @@ export function renderContributions(items: ContributionItem[], theme: Theme, con
   const view = `<clipPath id="rows"><rect x="0" y="${TOP - 4}" width="${WIDTH}" height="${VISIBLE * ROW}"/></clipPath>`;
 
   return card({
-    width: WIDTH,
-    height: CARD_HEIGHT,
     title: title ?? 'Notable contributions',
     desc: items.map((i) => `${i.repo} (${i.stars} stars): ${describe(i)}`).join('. '),
     theme,

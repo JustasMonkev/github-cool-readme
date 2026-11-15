@@ -114,8 +114,6 @@ export function renderStreaks(tiles: Tile[], sd: StreakDays, theme: Theme, confi
   }
 
   return card({
-    width: WIDTH,
-    height: CARD_HEIGHT,
     title: title ?? 'Streaks',
     desc: tiles.map((t) => `${t.label}: ${t.value}`).join('. ') + '.',
     theme,

@@ -60,7 +60,7 @@ export function renderDisplaySummary(m: SummaryModel, style: Style): string {
     `Active on ${m.activity.percent}% of the last 12 months.`,
   ].join(' ');
   return frame({
-    width: W, height: H, title: 'GitHub stats', desc, ...style,
+    title: 'GitHub stats', desc, ...style,
     css: show.css + ringCss,
     body: `<defs>${show.defs}${ringDefs}</defs>\n${show.markup}\n${ringPart}`,
   });

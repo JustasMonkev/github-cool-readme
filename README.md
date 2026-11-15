@@ -172,7 +172,7 @@ To turn the cards off, run it and turn every card off. They're taken out of your
 </picture>
 ```
 
-Same for `contributions`, `languages`, `weekly`, `streaks` and `about`. Show every card at `width="400"`: two fit a row, and on a narrow screen they stack. Every card then shows as 400 by 195: classic ones are that size, dot matrix and OLED ones are 450 by 219, scaled to fit.
+Same for `contributions`, `languages`, `weekly`, `streaks` and `about`. Show every card at `width="400"`: two fit a row, and on a narrow screen they stack. Every card is 450 by 219, in every style, so they all show as 400 by 195.
 
 ## Settings
 
@@ -202,7 +202,7 @@ cards:
     ring: percent         # or github: the GitHub logo in the ring, the percentage in the title
   languages:
     title: Most used languages   # null hides it
-    count: 6
+    count: 6              # up to 6, "Other" included
     hide: []              # language names; their share is dropped
     repos: {}             # weight per repo, "repo" for your own, "owner/repo" otherwise; 0 leaves it out
     other: true           # fold the rest into "Other"; false: the shown ones share 100%

@@ -4,7 +4,9 @@ import { CARDS, DEFAULT_CARDS, DEFAULT_CONFIG, STYLES, type Config } from '../sr
 import { describe as describeItem, pageOffsets, renderContributions } from '../src/cards/contributions/classic.ts';
 import { renderAll } from '../src/render/index.ts';
 import { THEMES } from '../src/palette.ts';
-import { formatCompact, truncate } from '../src/render/svg.ts';
+import { CARD_HEIGHT, PAD, formatCompact, truncate } from '../src/render/svg.ts';
+import { renderLanguages } from '../src/cards/languages/classic.ts';
+import { MAX_LANGUAGES } from '../src/cards/languages/index.ts';
 import { fixture } from './fixtures/snapshot.ts';
 
 /** Minimal well-formedness check: every opened tag is closed in order. */
@@ -54,12 +56,21 @@ describe('cards', () => {
     }
   });
 
-  it('makes the cards one size: every classic card 400 x 195, every display 450 x 219', () => {
+  it('makes every card one size, 450 x 219, in every style', () => {
     const size = (svg: string) => svg.match(/<svg [^>]*width="(\d+)" height="(\d+)"/)!.slice(1).join('x');
     for (const style of STYLES) {
       const files = render((c) => { everyCard(c); c.look.style = style; });
-      for (const card of CARDS) expect(size(files[`${card}-light.svg`]), `${style} ${card}`).toBe(style === 'classic' ? '400x195' : '450x219');
+      for (const card of CARDS) expect(size(files[`${card}-light.svg`]), `${style} ${card}`).toBe('450x219');
     }
+  });
+
+  it('fits the most languages there can be, Other included, with room below them', () => {
+    const items = Array.from({ length: MAX_LANGUAGES }, (_, i) => ({ name: i ? `Language ${i}` : 'Other', color: null, percent: 100 / MAX_LANGUAGES }));
+    const svg = renderLanguages(items, THEMES.light, DEFAULT_CONFIG);
+    // Each entry is a dot and a line of text, 12px tall, at its row's y; below the last, the card's padding.
+    const rows = [...svg.matchAll(/<g transform="translate\(\d+(?:\.\d+)? (\d+(?:\.\d+)?)\)"><g class="fade"/g)].map((m) => Number(m[1]));
+    expect(rows).toHaveLength(MAX_LANGUAGES);
+    expect(Math.max(...rows) + 12).toBeLessThanOrEqual(CARD_HEIGHT - PAD);
   });
 
   it('draws every display card in dots, with no text set in a font', () => {

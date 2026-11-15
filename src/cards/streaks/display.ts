@@ -4,7 +4,7 @@
 
 import type { StreakDays, Tile } from '../../stats.ts';
 import { textWidth } from '../../display/font.ts';
-import { COLS, H, W, drawDots, frame, path, type Cell, type Style } from '../../display/dmd.ts';
+import { COLS, drawDots, frame, path, type Cell, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
 import { slideshow, type Item } from '../../display/slides.ts';
 
@@ -89,7 +89,7 @@ export function renderDisplayStreaks(tiles: Tile[], sd: StreakDays, title: strin
   for (let c = STRIP.col; c < STRIP.col + STRIP_DAYS; c++) base.push([c, STRIP.bottom]);
 
   return frame({
-    width: W, height: H, title: title ?? 'Streaks',
+    title: title ?? 'Streaks',
     desc: tiles.map((t) => `${t.label}: ${t.value}`).join('. ') + '.',
     ...style,
     css: show.css,

@@ -1,6 +1,6 @@
 import type { Config } from '../../config.ts';
 import type { LanguageItem } from '../../compute.ts';
-import { CARD_HEIGHT, CONTENT_TOP, PAD, WIDTH, TEXT, card, esc, fadeIn, headerText, truncate, type Theme } from '../../render/svg.ts';
+import { CONTENT_TOP, PAD, WIDTH, TEXT, card, esc, fadeIn, headerText, truncate, type Theme } from '../../render/svg.ts';
 
 const BAR_Y = CONTENT_TOP + 2;
 const BAR_H = 10;
@@ -18,7 +18,7 @@ export function renderLanguages(items: LanguageItem[], theme: Theme, config: Con
 
   if (!items.length) {
     return card({
-      width: WIDTH, height: CARD_HEIGHT, title: title ?? 'Languages', desc: 'No language data.', theme, config,
+      title: title ?? 'Languages', desc: 'No language data.', theme, config,
       body: header + `<text x="${PAD}" y="${CONTENT_TOP + 14}" class="label muted">No language data yet</text>`,
     });
   }
@@ -59,10 +59,7 @@ export function renderLanguages(items: LanguageItem[], theme: Theme, config: Con
     })
     .join('\n');
 
-  const rows = Math.ceil(items.length / 2);
   return card({
-    width: WIDTH,
-    height: Math.max(CARD_HEIGHT, LEGEND_TOP + (rows - 1) * LEGEND_ROW + 26),
     title: title ?? 'Most used languages',
     desc: items.map((l) => `${l.name} ${pct(l.percent)}`).join(', '),
     theme,

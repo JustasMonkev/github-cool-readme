@@ -24,7 +24,7 @@ export function renderAbout(theme: Theme, config: Config): string {
   const animate = config.look.animations;
   if (!headline && !lines.length && !entries.length) {
     return card({
-      width: WIDTH, height: CARD_HEIGHT, title: title ?? 'About', desc: 'Nothing here yet.', theme, config,
+      title: title ?? 'About', desc: 'Nothing here yet.', theme, config,
       body: header + `<text x="${PAD}" y="${CONTENT_TOP + 14}" class="label muted">Nothing here yet</text>`,
     });
   }
@@ -102,8 +102,6 @@ export function renderAbout(theme: Theme, config: Config): string {
   }
 
   return card({
-    width: WIDTH,
-    height: CARD_HEIGHT,
     title: title ?? 'About',
     desc: [headline, ...lines, ...entries.map(([label, text]) => `${label}: ${text}`)].filter(Boolean).map((t) => unmarked(t!)).join(' '),
     theme,
