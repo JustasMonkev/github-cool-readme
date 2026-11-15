@@ -238,7 +238,7 @@ npm run preview                              # every look in preview/*.yml, ligh
 npm run examples                             # the README's cards in examples/, from the saved data
 npm test                                     # unit tests and the golden test
 npm run typecheck
-npm run lint:sh                              # shellcheck on setup.sh (brew install shellcheck)
+npm run lint:sh                              # shellcheck on setup (brew install shellcheck)
 ```
 
 `npm run dev` saves the raw data to `.cache/snapshot.json`. It names private repositories, so keep it out of anything public (it is gitignored).
@@ -259,7 +259,17 @@ CI runs the same on every push and pull request, and attaches the review page to
 
 `tests/compat/` holds every settings example released with v1 (the README's and `examples/cool-readme.yml`, from each tag), and one setup wrote. Each must still be read, and read the same way (`tests/compat/parsed.json`); the old-layout ones must also come out of setup's move to the new layout making the same cards. When the documented settings change, add the new example there.
 
-setup.sh keeps its own copies of the cards, styles, colours, panels and titles, as it needs nothing but bash; `tests/setup-sync.test.ts` fails when they drift from the TypeScript.
+Setup keeps its own copies of the cards, styles, colours, panels and titles, as it needs nothing but bash; `tests/setup-sync.test.ts` fails when they drift from the TypeScript. `tests/setup-edit.test.ts` runs the functions setup changes people's files with (`setup/edit.sh`) on sample files.
+
+### Setup
+
+`setup.sh` only gets setup's steps and runs them in order: they're in `setup/`, listed in `setup/blocks`. Run from a clone (`bash setup.sh --dry-run`), it uses those. Run with curl, it downloads them all first, from the newest v1 release, so they always come from one version. A change to setup reaches users with a release: publish it before moving `v1`. To try a pushed branch:
+
+```bash
+COOL_README_SETUP_REF=my-branch bash <(curl -fsSL https://raw.githubusercontent.com/pedrocatalao/github-cool-readme/my-branch/setup.sh) --dry-run
+```
+
+`npm run lint:sh` checks the steps joined in that order, as bash runs them.
 
 ## License
 

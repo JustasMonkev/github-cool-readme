@@ -43,4 +43,4 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - run: shellcheck --version && shellcheck setup.sh
+      - run: shellcheck --version && bash scripts/lint-setup.sh
