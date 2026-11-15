@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Releases a version: the GitHub release vX.Y.Z of what's on main, then v1 moved to it. In that
-# order: setup downloads its steps from the newest v1 release, and the action runs v1.
+# order: setup downloads its steps from v1 and names the newest v1 release, and the action runs v1.
 #
 #   npm run release -- 1.6.4 notes.md "what's in it, in a line"
 #   npm run release -- --dry-run 1.6.4 notes.md "..."     # checks, and says what it would do
@@ -89,7 +89,7 @@ git push --quiet origin "$tag"
 ok "tag $tag pushed"
 gh release create "$tag" --verify-tag --latest --title "$tag" --notes-file "$notes" >/dev/null
 ok "release $tag published"
-# Only now: until the release exists, setup would look for its steps in the one before.
+# Only now: so v1, where setup downloads its steps from, is always a published release.
 git tag -fa "$MAJOR" -m "$MAJOR: latest ${MAJOR#v}.x ($tag)" "$sha" >/dev/null
 git push --quiet --force origin "$MAJOR"
 ok "$MAJOR moved to $tag"

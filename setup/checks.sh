@@ -8,7 +8,8 @@ $NO_COMMIT && note "$(paint 33 'no commit: nothing will be committed, pushed or 
 $HAVE_TTY && note "$(paint 2 'Esc quits at any question')"
 
 # A setup.sh from before it said where its steps came from has no SETUP_FROM.
-[ -z "${SETUP_FROM:-}" ] || report ok "$SETUP_FROM"
+# Where the steps came from: setup.sh says, or, from a setup.sh before setup_from, SETUP_FROM.
+if declare -F setup_from >/dev/null; then report ok "$(setup_from)"; elif [ -n "${SETUP_FROM:-}" ]; then report ok "$SETUP_FROM"; fi
 
 command -v gh >/dev/null || die "the GitHub CLI (gh) is not installed" "install it from https://cli.github.com"
 command -v git >/dev/null || die "git is not installed"
