@@ -3,7 +3,9 @@
 // cards' titles. These tests read them out of its steps (setup/) and fail when the two drift apart.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { CARDS, COLORS, DEFAULT_CARDS, DEFAULT_CONFIG, NEW_KEYS, OLD_KEYS, STYLES } from '../src/config.ts';
+import { CARD_DEFS } from '../src/cards/index.ts';
+import { CARDS, COLORS, DEFAULT_CARDS, DEFAULT_CONFIG, NEW_KEYS, STYLES } from '../src/config.ts';
+import { OLD_CARDS, OLD_KEYS } from '../src/legacy.ts';
 import { look } from '../src/display/dmd.ts';
 import { cardWidths } from '../src/render/index.ts';
 import { THEMES } from '../src/render/svg.ts';
@@ -40,7 +42,8 @@ describe('setup agrees with the TypeScript on', () => {
   it('the keys that tell the old settings layout from the new one', () => {
     expect(words(/split\("(style matrix [^"]+)"/)).toEqual(OLD_KEYS);
     expect(words(/split\("(show [^"]+)"/)).toEqual(NEW_KEYS);
-    expect(words(/split\("([^"]+)", cc,/)).toEqual([...CARDS]);
+    // The migrator moves the cards there were before v1.5, whatever cards there are now.
+    expect(words(/split\("([^"]+)", cc,/)).toEqual(OLD_CARDS);
   });
 
   it("each colour's dark panel, offered as a background", () => {
@@ -57,10 +60,7 @@ describe('setup agrees with the TypeScript on', () => {
     const pictures = Object.fromEntries(
       [...setup.matchAll(/(\w+)\) picture \w+ "\$WIDTH" "([^"]+)"/g)].map((m) => [m[1], m[2]]),
     );
-    const titles = Object.fromEntries(
-      CARDS.map((card) => [card, card === 'summary' ? 'GitHub stats' : DEFAULT_CONFIG.cards[card].title]),
-    );
-    expect(pictures).toEqual(titles);
+    expect(pictures).toEqual(Object.fromEntries(CARD_DEFS.map((card) => [card.name, card.alt])));
     const width = Number(find(/^WIDTH=(\d+)$/m));
     for (const w of Object.values(cardWidths(DEFAULT_CONFIG))) expect(w).toBe(width);
   });

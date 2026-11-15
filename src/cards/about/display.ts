@@ -2,12 +2,12 @@
 // marked *like this* are in the accent colour; on a one-colour display, where the text is that
 // colour already, they're at full brightness and the rest of their text dimmed.
 
-import type { Config } from '../config.ts';
-import { marked, unmarked } from '../render/svg.ts';
-import { textWidth } from './font.ts';
-import { COLS, H, W, drawDots, frame, type Style } from './dmd.ts';
-import { fit, titleLine } from './languages.ts';
-import { slideshow, type Item } from './slides.ts';
+import type { Config } from '../../config.ts';
+import { marked, unmarked } from '../../render/svg.ts';
+import { textWidth } from '../../display/font.ts';
+import { COLS, H, W, drawDots, frame, type Style } from '../../display/dmd.ts';
+import { fit, titleLine } from '../../display/text.ts';
+import { slideshow, type Item } from '../../display/slides.ts';
 
 const WIDE = COLS - 8; // dot columns for text
 const LINE = 10; // rows from one line of text to the next

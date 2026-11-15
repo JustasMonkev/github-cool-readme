@@ -2,11 +2,11 @@
 // days that shows what the number is about: the current run, the longest one wherever it was, the
 // active days, how they compare with the average, the best day, the best month.
 
-import type { StreakDays, Tile } from '../stats.ts';
-import { textWidth } from './font.ts';
-import { COLS, H, W, drawDots, frame, path, type Cell, type Style } from './dmd.ts';
-import { fit, titleLine } from './languages.ts';
-import { slideshow, type Item } from './slides.ts';
+import type { StreakDays, Tile } from '../../stats.ts';
+import { textWidth } from '../../display/font.ts';
+import { COLS, H, W, drawDots, frame, path, type Cell, type Style } from '../../display/dmd.ts';
+import { fit, titleLine } from '../../display/text.ts';
+import { slideshow, type Item } from '../../display/slides.ts';
 
 /** How many days a strip shows: one dot column each, across the card. */
 export const STRIP_DAYS = COLS - 8;

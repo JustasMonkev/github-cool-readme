@@ -1,12 +1,12 @@
 // Notable contributions as a pinball-style display: one repo at a time.
 
-import type { ContributionItem } from '../compute.ts';
-import { describe } from '../render/contributions.ts';
-import { formatCompact } from '../render/svg.ts';
-import { textCells, textWidth } from './font.ts';
-import { COLS, H, W, drawDots, frame, path, type Look, type Style } from './dmd.ts';
-import { fit, titleLine } from './languages.ts';
-import { slideshow, type Item } from './slides.ts';
+import type { ContributionItem } from '../../compute.ts';
+import { describe } from './classic.ts';
+import { formatCompact } from '../../render/svg.ts';
+import { textCells, textWidth } from '../../display/font.ts';
+import { COLS, H, W, drawDots, frame, path, type Style } from '../../display/dmd.ts';
+import { fit, titleLine } from '../../display/text.ts';
+import { slideshow, type Item } from '../../display/slides.ts';
 
 export function renderDisplayContributions(items: ContributionItem[], title: string | null, style: Style): string {
   const { look } = style;

@@ -1,10 +1,10 @@
-import type { Config } from '../config.ts';
-import type { ContributionItem } from '../compute.ts';
-import { icon } from './icons.ts';
+import type { Config } from '../../config.ts';
+import type { ContributionItem } from '../../compute.ts';
+import { icon } from '../../render/icons.ts';
 import {
   CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, TEXT, WIDTH, card, pageOffsets as pages, scrolling, esc, fadeIn, formatCompact, formatMonth, headerText, plural,
   textWidth, truncate, type Theme,
-} from './svg.ts';
+} from '../../render/svg.ts';
 
 const VISIBLE = 3; // rows in view; more scroll past in a loop
 const ROW = 46;

@@ -7,7 +7,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { compute } from '../src/compute.ts';
-import { CARDS, parseConfig, usesOldLayout, type Config } from '../src/config.ts';
+import { CARDS, parseConfig, type Config } from '../src/config.ts';
+import { usesOldLayout } from '../src/legacy.ts';
 import { renderAll } from '../src/render/index.ts';
 import { yearFixture } from './fixtures/snapshot.ts';
 

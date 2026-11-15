@@ -4,8 +4,8 @@
 // last one, stay again, and crossfade back to the start. The headline stays. Words marked
 // *like this* are in the colour's emphasis. An SVG in a README can't hold working links, so those
 // go under the card.
-import type { Config } from '../config.ts';
-import { CAPS, CARD_HEIGHT, CONTENT_TOP, PAD, PAGE_HOLD, PAGE_MOVE, TEXT, WIDTH, card, esc, fadeIn, headerText, markedText, textWidth, unmarked, wrapMarked, type Theme } from './svg.ts';
+import type { Config } from '../../config.ts';
+import { CAPS, CARD_HEIGHT, CONTENT_TOP, PAD, PAGE_HOLD, PAGE_MOVE, TEXT, WIDTH, card, esc, fadeIn, headerText, markedText, textWidth, unmarked, wrapMarked, type Theme } from '../../render/svg.ts';
 
 const ROOM = 430; // in textWidth's estimate, which runs wide: the card's 360px of text
 const HEADLINE = 22;

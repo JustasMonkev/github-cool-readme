@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { compute } from '../src/compute.ts';
 import { CARDS, DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.ts';
 import { renderAll } from '../src/render/index.ts';
-import { wrap } from '../src/display/about.ts';
+import { wrap } from '../src/cards/about/display.ts';
 import { textCells } from '../src/display/font.ts';
 import { marked, markedText, unmarked, wrapMarked } from '../src/render/svg.ts';
 import { streakDays, streakLengths, streakStats } from '../src/stats.ts';

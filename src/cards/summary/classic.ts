@@ -1,7 +1,7 @@
-import type { Config } from '../config.ts';
-import type { CountKey, SummaryModel } from '../compute.ts';
-import { icon, type IconName } from './icons.ts';
-import { CARD_HEIGHT, CONTENT_TOP, PAD, WIDTH, card, esc, fadeIn, formatNumber, headerText, type Theme } from './svg.ts';
+import type { Config } from '../../config.ts';
+import type { CountKey, SummaryModel } from '../../compute.ts';
+import { icon, type IconName } from '../../render/icons.ts';
+import { CARD_HEIGHT, CONTENT_TOP, PAD, WIDTH, card, esc, fadeIn, formatNumber, headerText, type Theme } from '../../render/svg.ts';
 
 const ICONS: Record<CountKey, IconName> = {
   commits: 'git-commit',
