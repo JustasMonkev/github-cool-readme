@@ -4,7 +4,7 @@
 import type { Model } from '../compute.ts';
 import type { Config } from '../config.ts';
 import type { Style } from '../display/dmd.ts';
-import type { Theme } from '../render/svg.ts';
+import type { Theme } from '../render/classic.ts';
 import type { Shape } from '../shape.ts';
 
 export interface CardDef<Name extends string, Settings> {

@@ -1,7 +1,7 @@
 import type { Config } from '../../config.ts';
 import type { CountKey, SummaryModel } from '../../compute.ts';
 import { icon, type IconName } from '../../render/icons.ts';
-import { CONTENT_TOP, PAD, card, fadeIn, headerText, type Theme } from '../../render/svg.ts';
+import { CONTENT_TOP, PAD, card, fadeIn, headerText, type Theme } from '../../render/classic.ts';
 import { esc, formatNumber } from '../../text.ts';
 
 const ICONS: Record<CountKey, IconName> = {

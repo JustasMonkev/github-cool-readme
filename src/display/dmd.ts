@@ -7,7 +7,7 @@ import { esc } from '../text.ts';
 export const PITCH = 3;
 
 // Every display card is 150 x 73 cells, 450 x 219: the size of every card, classic ones too
-// (svg.ts).
+// (render/classic.ts).
 export const COLS = 150;
 export const ROWS = 73;
 export const W = COLS * PITCH; // 450

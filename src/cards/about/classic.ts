@@ -5,7 +5,7 @@
 // *like this* are in the colour's emphasis. An SVG in a README can't hold working links, so those
 // go under the card.
 import type { Config } from '../../config.ts';
-import { CAPS, CARD_HEIGHT, CONTENT_TOP, PAD, PAGE_HOLD, PAGE_MOVE, TEXT, WIDTH, card, fadeIn, headerText, markedText, textWidth, wrapMarked, type Theme } from '../../render/svg.ts';
+import { CAPS, CARD_HEIGHT, CONTENT_TOP, PAD, PAGE_HOLD, PAGE_MOVE, TEXT, WIDTH, card, fadeIn, headerText, markedText, textWidth, wrapMarked, type Theme } from '../../render/classic.ts';
 import { esc, unmarked } from '../../text.ts';
 
 const ROOM = 430; // in textWidth's estimate, which runs wide: the card's 360px of text

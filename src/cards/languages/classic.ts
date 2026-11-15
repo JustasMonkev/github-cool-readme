@@ -1,6 +1,6 @@
 import type { Config } from '../../config.ts';
 import type { LanguageItem } from '../../compute.ts';
-import { CONTENT_TOP, PAD, WIDTH, TEXT, card, fadeIn, headerText, truncate, type Theme } from '../../render/svg.ts';
+import { CONTENT_TOP, PAD, WIDTH, TEXT, card, fadeIn, headerText, truncate, type Theme } from '../../render/classic.ts';
 import { esc } from '../../text.ts';
 
 const BAR_Y = CONTENT_TOP + 2;

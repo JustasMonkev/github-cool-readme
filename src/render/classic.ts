@@ -1,3 +1,5 @@
+// What every classic card shares: its colours, its size and frame, the header line, text measured in
+// the card font, and the animations: fading in and scrolling a page at a time.
 import type { Config } from '../config.ts';
 import { H, W } from '../display/dmd.ts';
 import { PALETTE, THEMES, type Color, type Mode, type Theme } from '../palette.ts';
