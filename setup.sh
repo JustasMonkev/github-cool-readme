@@ -46,6 +46,7 @@ SETUP_BLOCKS=(
 SETUP_REPO="pedrocatalao/github-cool-readme"
 SETUP_MAJOR="v1" # the releases this setup takes its steps from
 SETUP_TMP=""     # where the steps were downloaded to, removed at the end
+SETUP_FROM=""    # where they came from, said at the start
 
 setup_fail() { # setup_fail what [what to do]: before the steps are loaded, so plain
   printf '  failed    %s\n' "$1" >&2
@@ -56,6 +57,7 @@ setup_fail() { # setup_fail what [what to do]: before the steps are loaded, so p
 here="${BASH_SOURCE[0]:-}"
 if [ -f "$here" ] && [ -f "$(dirname "$here")/setup/${SETUP_BLOCKS[0]}.sh" ]; then
   SETUP_DIR="$(cd "$(dirname "$here")" && pwd)/setup" # the steps are run from the profile repo, so a full path
+  SETUP_FROM="setup from this clone: $SETUP_DIR"
 else
   command -v gh >/dev/null || setup_fail "the GitHub CLI (gh) is not installed" "install it from https://cli.github.com"
   command -v git >/dev/null || setup_fail "git is not installed"
@@ -66,6 +68,9 @@ else
       | select(.tag_name | startswith(\"$SETUP_MAJOR.\"))][0].tag_name // empty" 2>/dev/null)" \
       || setup_fail "could not ask GitHub for the latest release of $SETUP_REPO" "check your connection and try again"
     [ -n "$SETUP_REF" ] || setup_fail "no $SETUP_MAJOR release of $SETUP_REPO found"
+    SETUP_FROM="setup $SETUP_REF, the latest release: its steps downloaded"
+  else
+    SETUP_FROM="setup from $SETUP_REF (COOL_README_SETUP_REF): its steps downloaded"
   fi
   SETUP_TMP="$(mktemp -d)"
   trap 'rm -rf "$SETUP_TMP"' EXIT # until the steps' own clean-up takes over

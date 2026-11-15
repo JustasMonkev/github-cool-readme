@@ -7,6 +7,9 @@ $DRY_RUN && note "$(paint 33 'dry run: nothing will be changed')"
 $NO_COMMIT && note "$(paint 33 'no commit: nothing will be committed, pushed or run')"
 $HAVE_TTY && note "$(paint 2 'Esc quits at any question')"
 
+# A setup.sh from before it said where its steps came from has no SETUP_FROM.
+[ -z "${SETUP_FROM:-}" ] || report ok "$SETUP_FROM"
+
 command -v gh >/dev/null || die "the GitHub CLI (gh) is not installed" "install it from https://cli.github.com"
 command -v git >/dev/null || die "git is not installed"
 gh auth status >/dev/null 2>&1 || die "gh is not logged in" "run: gh auth login"
