@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# shellcheck on setup: setup.sh and its steps, joined in the order setup/blocks runs them, as bash
+# shellcheck on setup: setup.sh and its steps, joined in the order setup.sh runs them, as bash
 # sees them (one shell, so what one step sets the next one uses). Each finding is reported at its
 # line in its own file. Exits 1 when there's any.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# SETUP_BLOCKS, as setup.sh defines it.
+eval "$(sed -n '/^SETUP_BLOCKS=(/,/^)/p' setup.sh)"
 files=(setup.sh)
-while read -r block; do files+=("setup/$block.sh"); done < setup/blocks
+for block in "${SETUP_BLOCKS[@]}"; do files+=("setup/$block.sh"); done
 
 joined="$(mktemp)"; map="$(mktemp)"
 trap 'rm -f "$joined" "$map"' EXIT

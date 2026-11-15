@@ -263,7 +263,7 @@ Setup keeps its own copies of the cards, styles, colours, panels and titles, as 
 
 ### Setup
 
-`setup.sh` only gets setup's steps and runs them in order: they're in `setup/`, listed in `setup/blocks`. Run from a clone (`bash setup.sh --dry-run`), it uses those. Run with curl, it downloads them all first, from the newest v1 release, so they always come from one version. A change to setup reaches users with a release: publish it before moving `v1`. To try a pushed branch:
+`setup.sh` only gets setup's steps and runs them in order: they're in `setup/`, in the order its `SETUP_BLOCKS` lists them. Run from a clone (`bash setup.sh --dry-run`), it uses those. Run with curl, it downloads them all first, from the newest v1 release, so they always come from one version. A change to setup reaches users with a release: publish it before moving `v1`. To try a pushed branch:
 
 ```bash
 COOL_README_SETUP_REF=my-branch bash <(curl -fsSL https://raw.githubusercontent.com/pedrocatalao/github-cool-readme/my-branch/setup.sh) --dry-run

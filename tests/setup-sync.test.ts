@@ -8,9 +8,12 @@ import { look } from '../src/display/dmd.ts';
 import { cardWidths } from '../src/render/index.ts';
 import { THEMES } from '../src/render/svg.ts';
 
-/** Every step of setup, in the order it runs them. */
-const setup = readFileSync('setup/blocks', 'utf8')
+/** Every step of setup, in the order setup.sh runs them (its SETUP_BLOCKS). */
+const blocks = readFileSync('setup.sh', 'utf8').match(/^SETUP_BLOCKS=\(\n([\s\S]*?)^\)$/m)?.[1];
+if (!blocks) throw new Error('setup.sh no longer has SETUP_BLOCKS: update this test along with it');
+const setup = blocks
   .split('\n')
+  .map((line) => line.replace(/#.*/, '').trim())
   .filter(Boolean)
   .map((block) => readFileSync(`setup/${block}.sh`, 'utf8'))
   .join('\n');
