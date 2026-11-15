@@ -2,7 +2,8 @@ import { CARD_DEFS, type CardDefs } from '../cards/index.ts';
 import { CARDS, type Config } from '../config.ts';
 import type { Model } from '../compute.ts';
 import { look, type Style } from '../display/dmd.ts';
-import { surfaceOf, themeFor, type Mode } from './svg.ts';
+import { surfaceOf, type Mode } from '../palette.ts';
+import { themeFor } from './svg.ts';
 
 /**
  * File name -> SVG, one light and one dark variant of each card in `config.show`, in the usual

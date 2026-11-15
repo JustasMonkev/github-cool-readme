@@ -8,7 +8,7 @@ import { CARDS, COLORS, DEFAULT_CARDS, DEFAULT_CONFIG, NEW_KEYS, STYLES } from '
 import { OLD_CARDS, OLD_KEYS } from '../src/legacy.ts';
 import { look } from '../src/display/dmd.ts';
 import { cardWidths } from '../src/render/index.ts';
-import { THEMES } from '../src/render/svg.ts';
+import { THEMES } from '../src/palette.ts';
 
 /** Every step of setup, in the order setup.sh runs them (its SETUP_BLOCKS). */
 const blocks = readFileSync('setup.sh', 'utf8').match(/^SETUP_BLOCKS=\(\n([\s\S]*?)^\)$/m)?.[1];
