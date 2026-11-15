@@ -46,7 +46,6 @@ block="$(mktemp)"
   [ $((n % 2)) = 1 ] && echo '</p>'
   echo "$END"
 } > "$block"
-size="$WIDTH wide"
 shown="the cards"; $CARDS_OFF && shown="no cards (they're off)"
 missing_cards=false # a card that's on but not made yet: the README waits for the first run
 for card in $S_CARDS; do made "$card-light.svg" || missing_cards=true; done
@@ -71,7 +70,7 @@ elif $CARDS_OFF; then
   fi
   if $OLD_STATS; then git rm -r --quiet "$OUT"; report removed "$OUT/: no longer used"; fi
 elif ! $missing_cards; then
-  git diff --quiet README.md || report updated "the cards $where, $size"
+  git diff --quiet README.md || report updated "the cards $where"
   if $OLD_STATS; then git rm -r --quiet "$OUT"; report removed "$OUT/: the cards are on the $BRANCH branch now"; fi
 else
   README_LATER=true
@@ -79,7 +78,7 @@ else
   cp README.md "$WORK/README.next"
   git reset --quiet README.md
   if $HAD_README; then git checkout --quiet -- README.md; else rm -f README.md; fi
-  report updated "the cards $where, $size"
+  report updated "the cards $where"
   if $OLD_STATS; then
     report removed "$OUT/: the cards will be on the $BRANCH branch"
     printf '%s\n' "and $OUT/ is removed ($(git ls-files "$OUT" | wc -l | tr -d ' ') files)" >> "$WORK/readme.diff"
