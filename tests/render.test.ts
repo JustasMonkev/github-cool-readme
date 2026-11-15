@@ -4,7 +4,8 @@ import { CARDS, DEFAULT_CARDS, DEFAULT_CONFIG, STYLES, type Config } from '../sr
 import { describe as describeItem, pageOffsets, renderContributions } from '../src/cards/contributions/classic.ts';
 import { renderAll } from '../src/render/index.ts';
 import { THEMES } from '../src/palette.ts';
-import { CARD_HEIGHT, PAD, formatCompact, truncate } from '../src/render/svg.ts';
+import { CARD_HEIGHT, PAD, truncate } from '../src/render/svg.ts';
+import { formatCompact } from '../src/text.ts';
 import { renderLanguages } from '../src/cards/languages/classic.ts';
 import { MAX_LANGUAGES } from '../src/cards/languages/index.ts';
 import { fixture } from './fixtures/snapshot.ts';

@@ -1,5 +1,5 @@
 // Numbers worked out from the contribution calendar of the last 12 months, for the streaks card.
-import { formatDay, formatMonth, formatNumber, plural } from './render/svg.ts';
+import { formatDay, formatMonth, formatNumber, plural } from './text.ts';
 import type { Snapshot } from './types.ts';
 
 /** A big number (or short text) with its label under it. */

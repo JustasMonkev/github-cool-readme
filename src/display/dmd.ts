@@ -2,6 +2,7 @@
 // colours), the panel with optional round LED dots, and keyframe helpers.
 
 import { PALETTE, THEMES, type Color, type Mode } from '../palette.ts';
+import { esc } from '../text.ts';
 
 export const PITCH = 3;
 
@@ -156,10 +157,6 @@ export function keyframes(name: string, total: number, frames: { t: number; css:
   const pct = (t: number) => `${Math.min(100, Math.max(0, (t / total) * 100)).toFixed(3)}%`;
   const body = sorted.map((f) => `${pct(f.t)} { ${f.css}${f.ease ? ` animation-timing-function: ${f.ease};` : ''} }`).join(' ');
   return `\n  @keyframes ${name} { ${body} }`;
-}
-
-export function esc(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 /** How a display card is drawn. */

@@ -6,7 +6,8 @@ import { DEFAULT_CONFIG, parseConfig, type Config } from '../src/config.ts';
 import { renderAll } from '../src/render/index.ts';
 import { wrap } from '../src/cards/about/display.ts';
 import { textCells } from '../src/display/font.ts';
-import { marked, markedText, unmarked, wrapMarked } from '../src/render/svg.ts';
+import { markedText, wrapMarked } from '../src/render/svg.ts';
+import { marked, unmarked } from '../src/text.ts';
 import { streakDays, streakLengths, streakStats } from '../src/stats.ts';
 import { fixture } from './fixtures/snapshot.ts';
 

@@ -1,6 +1,7 @@
 import type { Config } from '../config.ts';
 import { H, W } from '../display/dmd.ts';
 import { PALETTE, THEMES, type Color, type Mode, type Theme } from '../palette.ts';
+import { esc, marked } from '../text.ts';
 
 export type { Theme } from '../palette.ts';
 
@@ -34,36 +35,6 @@ export function headerText(text: string, x: number, anchor: 'start' | 'middle' |
 
 export const FONT = `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif`;
 
-export function esc(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-}
-
-export function formatNumber(n: number): string {
-  return Math.round(n).toLocaleString('en-US');
-}
-
-export function formatCompact(n: number): string {
-  if (n < 1000) return String(n);
-  if (n < 10_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`;
-  if (n < 1_000_000) return `${Math.round(n / 1000)}k`;
-  return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-}
-
-export function plural(n: number, word: string): string {
-  return `${n} ${word}${n === 1 ? '' : 's'}`;
-}
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-export function formatMonth(iso: string): string {
-  const d = new Date(iso);
-  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-}
-
-export function formatDay(iso: string): string {
-  const d = new Date(iso);
-  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
-}
-
 /** Rough text width for the card fonts, to truncate long names. */
 export function textWidth(s: string, fontSize: number, bold = false): number {
   return s.length * fontSize * (bold ? 0.6 : 0.56);
@@ -74,24 +45,6 @@ export function truncate(s: string, maxWidth: number, fontSize: number, bold = f
   let out = s;
   while (out.length > 1 && textWidth(`${out}…`, fontSize, bold) > maxWidth) out = out.slice(0, -1);
   return `${out}…`;
-}
-
-/** Text with parts marked *like this*: the parts in order, the marked ones flagged. A lone * stays as it is. */
-export function marked(text: string): { text: string; mark: boolean }[] {
-  const parts: { text: string; mark: boolean }[] = [];
-  let at = 0;
-  for (const m of text.matchAll(/\*([^*]+)\*/g)) {
-    if (m.index > at) parts.push({ text: text.slice(at, m.index), mark: false });
-    parts.push({ text: m[1], mark: true });
-    at = m.index + m[0].length;
-  }
-  if (at < text.length) parts.push({ text: text.slice(at), mark: false });
-  return parts;
-}
-
-/** Text without its marks. */
-export function unmarked(text: string): string {
-  return marked(text).map((p) => p.text).join('');
 }
 
 /**
