@@ -1,7 +1,7 @@
 // Summary as a pinball-style display: the activity ring stays on, the stats take turns.
 
 import { createRequire } from 'node:module';
-import type { SummaryModel } from '../../compute.ts';
+import type { SummaryModel } from './data.ts';
 import { textCells, textWidth } from '../../display/font.ts';
 import { H, PITCH, TITLE_ROW, W, frame, path, ringCells, type Style } from '../../display/dmd.ts';
 import { rasterize } from '../../display/raster.ts';

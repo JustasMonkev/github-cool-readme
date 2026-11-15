@@ -6,8 +6,9 @@
 // then on to page 1. The graph is always about the number at the bottom left, which is in green, and
 // its green moves over the bars to the next page's days, spreading out or gathering in.
 import type { Config } from '../../config.ts';
-import type { StreakDays, Tile } from '../../stats.ts';
-import { CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, WIDTH, card, esc, fadeIn, formatNumber, headerText, truncate, type Theme } from '../../render/svg.ts';
+import type { StreakDays, Tile } from './data.ts';
+import { CARD_HEIGHT, CONTENT_TOP, PAD, SMALL, WIDTH, card, fadeIn, headerText, truncate, type Theme } from '../../render/classic.ts';
+import { esc, formatNumber } from '../../text.ts';
 
 const COLUMN = (WIDTH - 2 * PAD) / 2; // two in view
 const ROW = 46;

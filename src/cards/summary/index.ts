@@ -1,5 +1,6 @@
 import { ConfigError } from '../../shape.ts';
 import type { CardDef } from '../card.ts';
+import { summaryData, type SummaryModel } from './data.ts';
 import { renderSummary } from './classic.ts';
 import { renderDisplaySummary } from './display.ts';
 
@@ -10,7 +11,7 @@ export interface SummarySettings {
   ring: 'percent' | 'github';
 }
 
-export const summary: CardDef<'summary', SummarySettings> = {
+export const summary: CardDef<'summary', SummarySettings, SummaryModel> = {
   name: 'summary',
   on: true,
   alt: 'GitHub stats',
@@ -19,6 +20,7 @@ export const summary: CardDef<'summary', SummarySettings> = {
   check: (s) => {
     if (s.ring !== 'percent' && s.ring !== 'github') throw new ConfigError('"cards.summary.ring" must be "percent" or "github"');
   },
-  classic: (model, theme, config) => renderSummary(model.summary, theme, config),
-  display: (model, style) => renderDisplaySummary(model.summary, style),
+  data: summaryData,
+  classic: (data, theme, config) => renderSummary(data, theme, config),
+  display: (data, style) => renderDisplaySummary(data, style),
 };

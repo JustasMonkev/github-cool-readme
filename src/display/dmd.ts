@@ -2,18 +2,18 @@
 // colours), the panel with optional round LED dots, and keyframe helpers.
 
 import { PALETTE, THEMES, type Color, type Mode } from '../palette.ts';
+import { esc } from '../text.ts';
 
 export const PITCH = 3;
 
 // Every display card is 150 x 73 cells, 450 x 219: the size of every card, classic ones too
-// (svg.ts).
+// (render/classic.ts).
 export const COLS = 150;
 export const ROWS = 73;
 export const W = COLS * PITCH; // 450
 export const H = ROWS * PITCH; // 219
 /** The row of the title line at the top of every card. */
 export const TITLE_ROW = 3;
-const FONT = `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif`;
 
 export type Cell = [number, number];
 
@@ -158,10 +158,6 @@ export function keyframes(name: string, total: number, frames: { t: number; css:
   return `\n  @keyframes ${name} { ${body} }`;
 }
 
-export function esc(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-}
-
 /** How a display card is drawn. */
 export interface Style {
   look: Look;
@@ -196,8 +192,7 @@ export function frame(o: FrameOptions): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none" role="img" aria-labelledby="title desc">
 <title id="title">${esc(o.title)}</title>
 <desc id="desc">${esc(o.desc)}</desc>
-<style>
-  text { font-family: ${FONT}; }${o.animations ? o.css : ''}
+<style>${o.animations ? o.css : ''}
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 ${panel}

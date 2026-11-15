@@ -2,7 +2,7 @@
 // and on the right the busiest day, the quietest and how much is on weekdays. It dissolves in,
 // stays, and snaps off to dissolve in again.
 
-import { weekdayFacts, type WeekdayItem } from '../../compute.ts';
+import { weekdayFacts, type WeekdayItem } from './data.ts';
 import { textCells, textWidth } from '../../display/font.ts';
 import { H, PITCH, W, frame, keyframes, maskPath, path, type Cell, type Style } from '../../display/dmd.ts';
 import { titleLine } from '../../display/text.ts';

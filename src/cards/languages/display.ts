@@ -1,6 +1,6 @@
 // Languages as a pinball-style display: one language at a time, one bar that grows and shrinks.
 
-import type { LanguageItem } from '../../compute.ts';
+import type { LanguageItem } from './data.ts';
 import { textCells, textWidth } from '../../display/font.ts';
 import { COLS, H, PITCH, W, frame, keyframes, path, type Cell, type Style } from '../../display/dmd.ts';
 import { ENTER, HOLD, slideshow, type Item } from '../../display/slides.ts';

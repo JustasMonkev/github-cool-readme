@@ -3,7 +3,7 @@
 // colour already, they're at full brightness and the rest of their text dimmed.
 
 import type { Config } from '../../config.ts';
-import { marked, unmarked } from '../../render/svg.ts';
+import { marked, unmarked } from '../../text.ts';
 import { textWidth } from '../../display/font.ts';
 import { COLS, frame, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';

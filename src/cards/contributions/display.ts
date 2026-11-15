@@ -1,8 +1,8 @@
 // Notable contributions as a pinball-style display: one repo at a time.
 
-import type { ContributionItem } from '../../compute.ts';
+import type { ContributionItem } from './data.ts';
 import { describe } from './classic.ts';
-import { formatCompact } from '../../render/svg.ts';
+import { formatCompact } from '../../text.ts';
 import { textCells, textWidth } from '../../display/font.ts';
 import { COLS, frame, path, type Style } from '../../display/dmd.ts';
 import { fit, titleLine } from '../../display/text.ts';
