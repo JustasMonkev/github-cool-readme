@@ -236,10 +236,30 @@ GITHUB_TOKEN=$(gh auth token) npm run dev   # fetch, render to out/, write out/p
 npm run dev:offline                          # re-render from the saved data, no API calls
 npm run preview                              # every look in preview/*.yml, light and dark, in out/preview/index.html
 npm run examples                             # the README's cards in examples/, from the saved data
-npm test
+npm test                                     # unit tests and the golden test
+npm run typecheck
+npm run lint:sh                              # shellcheck on setup.sh (brew install shellcheck)
 ```
 
 `npm run dev` saves the raw data to `.cache/snapshot.json`. It names private repositories, so keep it out of anything public (it is gitignored).
+
+### Golden test
+
+`npm test` renders every card in every look (each style, colour, background, still or animated; see `tests/golden/matrix.ts`) from the same made-up data, and compares each with its hash in `tests/golden/hashes.txt`. Any change to any card fails it, naming the cards.
+
+```bash
+npm run review                          # out/review/index.html: the changed cards, before (HEAD) and after, side by side
+npm run review -- --base main           # the same against another branch, tag or commit
+npm run test:update                     # accept the changes: commit the new hashes.txt with them
+```
+
+CI runs the same on every push and pull request, and attaches the review page to the run as `card-review` when cards changed.
+
+### Settings that keep working
+
+`tests/compat/` holds every settings example released with v1 (the README's and `examples/cool-readme.yml`, from each tag), and one setup wrote. Each must still be read, and read the same way (`tests/compat/parsed.json`); the old-layout ones must also come out of setup's move to the new layout making the same cards. When the documented settings change, add the new example there.
+
+setup.sh keeps its own copies of the cards, styles, colours, panels and titles, as it needs nothing but bash; `tests/setup-sync.test.ts` fails when they drift from the TypeScript.
 
 ## License
 

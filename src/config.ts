@@ -197,6 +197,19 @@ function background(node: unknown, where: string): string {
 type Raw = Record<string, unknown>;
 const isMap = (v: unknown): v is Raw => typeof v === 'object' && v !== null && !Array.isArray(v);
 
+/**
+ * A mapping written with nothing under it ("repos:") is null in YAML: taken as an empty one. setup
+ * from v1.5.0 to v1.6.1 wrote "repos:" like that when it moved settings without repo weights.
+ */
+function emptyMappings(value: unknown, shape: Shape): void {
+  if (!isMap(value)) return;
+  for (const [key, expected] of Object.entries(shape)) {
+    if (!(key in value)) continue;
+    if (typeof expected === 'object') emptyMappings(value[key], expected);
+    else if ((expected === 'weights' || expected === 'strings') && value[key] === null) value[key] = {};
+  }
+}
+
 /** Settings in the layout before v1.5, moved to the new one: the same cards, looking the same. */
 function fromOld(o: Raw): Raw {
   check(o, OLD_SHAPE, '');
@@ -236,8 +249,8 @@ function fromOld(o: Raw): Raw {
   return out;
 }
 
-const OLD_KEYS = ['style', 'matrix', 'color', 'background', 'transparent', 'include', 'theme', 'summary', 'languages', 'contributions', 'weekly', 'streaks', 'about'];
-const NEW_KEYS = ['show', 'count', 'look'];
+export const OLD_KEYS = ['style', 'matrix', 'color', 'background', 'transparent', 'include', 'theme', 'summary', 'languages', 'contributions', 'weekly', 'streaks', 'about'];
+export const NEW_KEYS = ['show', 'count', 'look'];
 
 /** Settings files in the layout before v1.5; they still work, and setup moves them to the new one. */
 const OLD_LAYOUT = new WeakSet<Config>();
@@ -256,6 +269,7 @@ export function parseConfig(text: string): Config {
   if (old.length && current.length) {
     throw new ConfigError(`"${current[0]}" is in the new layout of the settings, "${old[0]}" in the old one: use the new one (run setup again to move them)`);
   }
+  emptyMappings(raw, old.length ? OLD_SHAPE : SHAPE);
   if (old.length) {
     if ('background' in raw) raw.background = background(doc.get('background', true), 'background');
     raw = fromOld(raw);

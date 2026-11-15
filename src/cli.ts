@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { collect } from './collect.ts';
@@ -38,15 +38,12 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Without --config, cool-readme.yml if there is one. Only a missing file means the defaults: a
+  // file with a mistake in it is an error, not silently ignored.
   let config = DEFAULT_CONFIG;
-  if (values.config) config = loadConfig(values.config);
-  else {
-    try {
-      config = loadConfig('cool-readme.yml');
-    } catch {
-      log('No cool-readme.yml found, using the defaults');
-    }
-  }
+  const configFile = values.config ?? (existsSync('cool-readme.yml') ? 'cool-readme.yml' : null);
+  if (configFile) config = loadConfig(configFile);
+  else log('No cool-readme.yml found, using the defaults');
 
   if (usesOldLayout(config)) {
     log('note: your settings are in the layout from before v1.5. They still work; run setup again to move them to the new one (see the README)');
