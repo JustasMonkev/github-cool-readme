@@ -176,5 +176,11 @@ else
       about_set "$CONFIG" "$(about_placeholder)"
       report added "an empty about section under cards: in $CONFIG; write the about card's text there"
     fi
+  # With text, it's kept, unless you'd rather type it again: what setup writes is always valid, so
+  # this also mends text edited by hand that the action can't read (the error says so).
+  elif card_on about && ! $OLD_KEPT && $HAVE_TTY; then
+    section "About card"
+    note "it has your text; to change it, type it again here or edit $CONFIG"
+    if yesno "Keep it?" y; then report kept "the about card's text"; else write_about; fi
   fi
 fi
