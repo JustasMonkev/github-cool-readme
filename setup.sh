@@ -427,7 +427,7 @@ migrate_config() { # migrate_config file
 # The settings screen: one row per setting; its number cycles the value, Enter continues.
 # Values are kept in S_PRIVATE, S_ORGS, S_STYLE, S_COLOR and S_BG: none, dark (the colour's own dark
 # panel), or a colour of your own from cool-readme.yml (S_BG_OWN), shown as it is.
-rows() { echo "private orgs style color background"; }
+ROWS=(private orgs style color background)
 row_name() { case "$1" in color) echo colour ;; private) echo "private repos" ;; orgs) echo "org repos" ;; *) echo "$1" ;; esac; }
 row_values() {
   case "$1" in
@@ -461,7 +461,7 @@ SROW=1   # the row ▸ is on
 draw_settings() { paint_frame "$(settings_frame "${1:-}")"; } # draw_settings [done]: the settings screen
 settings_frame() { # settings_frame [done]: the settings screen's lines
   local n=1 row v line mark
-  for row in $(rows); do
+  for row in "${ROWS[@]}"; do
     line=""
     for v in $(row_values "$row"); do
       if [ "$v" = "$(get_row "$row")" ]; then line="$line  $(paint '1;32' "● $(row_label "$row" "$v")")"
@@ -477,18 +477,16 @@ settings_frame() { # settings_frame [done]: the settings screen's lines
 settings_screen() {
   local row n count
   if ! $FANCY; then
-    for row in $(rows); do note "$(printf '%-13s %s' "$(row_name "$row")" "$(row_label "$row" "$(get_row "$row")")")"; done
+    for row in "${ROWS[@]}"; do note "$(printf '%-13s %s' "$(row_name "$row")" "$(row_label "$row" "$(get_row "$row")")")"; done
     return
   fi
-  # shellcheck disable=SC2046 # the setting names have no spaces: split on purpose
-  count="$(set -- $(rows); echo $#)"
+  count=${#ROWS[@]}
   quiet_keys on
   FRAME_H=0; draw_settings
   while :; do
     read_key
     [ -n "$KEY" ] || break
-    # shellcheck disable=SC2046 # the setting names have no spaces: split on purpose
-    row="$(set -- $(rows); eval "echo \${$SROW}")"
+    row="${ROWS[SROW - 1]}"
     case "$KEY" in
       UP) [ "$SROW" -gt 1 ] && SROW=$((SROW - 1)) ;;
       DOWN) [ "$SROW" -lt "$count" ] && SROW=$((SROW + 1)) ;;
@@ -856,11 +854,16 @@ known() { # known "card card": the known cards among them, each once, in the ord
 # goes to the bottom of the on ones, and the ▸ goes with it); Shift with up or down moves a card
 # that's on among the others.
 without() { printf ' %s ' "$1" | sed "s/ $2 / /; s/^ *//; s/ *$//"; } # without "list" card
+pos() { # pos "list" card: where the card is in the list, from 0 (its length when it isn't there)
+  local a i
+  read -ra a <<< "$1"
+  for ((i = 0; i < ${#a[@]}; i++)); do [ "${a[$i]}" = "$2" ] && break; done
+  echo "$i"
+}
 move_card() { # move_card up|down: SEL one place up or down among the cards that are on
   local a i j t
-  # shellcheck disable=SC2206 # card names have no spaces: split on purpose
-  a=($S_CARDS)
-  for ((i = 0; i < ${#a[@]}; i++)); do [ "${a[$i]}" = "$SEL" ] && break; done
+  read -ra a <<< "$S_CARDS"
+  i="$(pos "$S_CARDS" "$SEL")"
   if [ "$1" = up ]; then j=$((i - 1)); else j=$((i + 1)); fi
   { [ "$i" -lt "${#a[@]}" ] && [ "$j" -ge 0 ] && [ "$j" -lt "${#a[@]}" ]; } || return 0
   t="${a[$i]}"; a[i]="${a[$j]}"; a[j]="$t"
@@ -893,17 +896,15 @@ $WAS_OFF || cur_cards="${cur_cards:-$DEFAULT_CARDS}"
 S_CARDS="$cur_cards"
 OFF=""
 for card in $CARD_NAMES; do card_on "$card" || OFF="${OFF:+$OFF }$card"; done
-# shellcheck disable=SC2086 # card names have no spaces: split on purpose
-SEL="$(set -- $S_CARDS $OFF; echo "$1")"
+read -r SEL _ <<< "$S_CARDS $OFF" # the first card
 cards_hint() {
   if [ -n "$S_CARDS" ]; then echo "↑↓ to choose, space for on/off, shift ↑↓ to move, Enter to continue"
   else echo "all off: out of your README, no schedule; space for on/off, Enter to continue"; fi
 }
 move_sel() { # move_sel up|down: the ▸ to the row above or below
   local a i
-  # shellcheck disable=SC2206 # card names have no spaces: split on purpose
-  a=($S_CARDS $OFF)
-  for ((i = 0; i < ${#a[@]}; i++)); do [ "${a[$i]}" = "$SEL" ] && break; done
+  read -ra a <<< "$S_CARDS $OFF"
+  i="$(pos "$S_CARDS $OFF" "$SEL")"
   if [ "$1" = up ] && [ "$i" -gt 0 ]; then SEL="${a[$((i - 1))]}"; fi
   if [ "$1" = down ] && [ "$((i + 1))" -lt "${#a[@]}" ]; then SEL="${a[$((i + 1))]}"; fi
   return 0
@@ -921,11 +922,9 @@ if $FANCY; then
       SHIFT_DOWN) card_on "$SEL" && move_card down ;;
       ' ')
         if card_on "$SEL"; then # the ▸ stays on its row, on the card that takes the place of this one
-          # shellcheck disable=SC2086 # card names have no spaces: split on purpose
-          row="$(set -- $S_CARDS $OFF; i=1; for c; do [ "$c" = "$SEL" ] && break; i=$((i + 1)); done; echo "$i")"
+          row="$(pos "$S_CARDS $OFF" "$SEL")"
           S_CARDS="$(without "$S_CARDS" "$SEL")"; OFF="$SEL${OFF:+ $OFF}"
-          # shellcheck disable=SC2086 # card names have no spaces: split on purpose
-          SEL="$(set -- $S_CARDS $OFF; eval "echo \${$row}")"
+          read -ra all <<< "$S_CARDS $OFF"; SEL="${all[row]}"
         else OFF="$(without "$OFF" "$SEL")"; S_CARDS="${S_CARDS:+$S_CARDS }$SEL"; fi ;;
     esac
     paint_frame "$(draw_cards "$(cards_hint)")"
@@ -1132,8 +1131,8 @@ if grep -qF "$START" README.md && grep -qF "$END" README.md; then
   mv README.md.new README.md
   where="between the cool-readme markers"
 else
-  # shellcheck disable=SC2094 # only checks the size before appending; nothing reads it in the pipeline
-  { [ -s README.md ] && echo; cat "$block"; } >> README.md
+  if [ -s README.md ]; then echo >> README.md; fi
+  cat "$block" >> README.md
   where="at the end; move the marked block wherever you like"
 fi
 git add -N README.md # so a new README shows in the diff too
