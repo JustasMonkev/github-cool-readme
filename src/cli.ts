@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { collect } from './collect.ts';
-import { compute } from './compute.ts';
+import { collect, collectCalendar } from './collect.ts';
+import { compute, computeCalendar, type CalendarModel, type Model } from './compute.ts';
 import { ConfigError, DEFAULT_CONFIG, SETUP_COMMAND, loadConfig } from './config.ts';
 import { usesOldLayout } from './legacy.ts';
 import { createClient } from './github.ts';
@@ -73,24 +73,29 @@ async function main(): Promise<void> {
     return;
   }
 
-  let snapshot: Snapshot;
+  let model: Model | CalendarModel;
   if (values['from-snapshot']) {
-    snapshot = JSON.parse(readFileSync(values['from-snapshot'], 'utf8')) as Snapshot;
+    const snapshot = JSON.parse(readFileSync(values['from-snapshot'], 'utf8')) as Snapshot;
     log(`Using data from ${values['from-snapshot']} (${snapshot.generatedAt})`);
+    if (snapshot.version !== 5) throw new ConfigError('the snapshot was made by an older version; collect it again');
+    model = compute(snapshot, config);
   } else {
     const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
     if (!token) throw new ConfigError(IN_ACTIONS ? NO_SECRET : 'set GITHUB_TOKEN (or GH_TOKEN) to a token with the repo, read:org and read:user scopes');
-    snapshot = await collect(createClient(token, log), config, log);
-    if (values.snapshot) {
-      mkdirSync(dirname(values.snapshot), { recursive: true });
-      writeFileSync(values.snapshot, JSON.stringify(snapshot, null, 2));
-      log(`Saved raw data to ${values.snapshot}`);
+    const client = createClient(token, log);
+    if (!values.snapshot && config.show.every((card) => card === 'weekly' || card === 'streaks')) {
+      model = computeCalendar(await collectCalendar(client, config, log), config);
+    } else {
+      const snapshot = await collect(client, config, log);
+      if (values.snapshot) {
+        mkdirSync(dirname(values.snapshot), { recursive: true });
+        writeFileSync(values.snapshot, JSON.stringify(snapshot, null, 2));
+        log(`Saved raw data to ${values.snapshot}`);
+      }
+      model = compute(snapshot, config);
     }
   }
 
-  if (snapshot.version !== 5) throw new ConfigError('the snapshot was made by an older version; collect it again');
-
-  const model = compute(snapshot, config);
   for (const note of model.notes) log(`note: ${note}`);
 
   const files = renderAll(model, config);

@@ -1,5 +1,5 @@
 // The weekly card's numbers: your contributions per weekday, and what stands out in them.
-import type { Counted } from '../../compute.ts';
+import type { CalendarContext } from '../../compute.ts';
 
 /** Contributions per weekday over the last 12 months, Monday first. */
 export interface WeekdayItem {
@@ -28,7 +28,7 @@ export const DAY_NAMES: Record<string, string> = {
   Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
 };
 
-export function weeklyData({ snapshot }: Counted): WeekdayItem[] {
+export function weeklyData({ snapshot }: CalendarContext): WeekdayItem[] {
   // Weekly rhythm: the contribution calendar summed per weekday. Like the active-days ring, it
   // follows the calendar, which the count settings cannot filter.
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

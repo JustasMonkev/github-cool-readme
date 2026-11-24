@@ -1,5 +1,5 @@
 // Numbers worked out from the contribution calendar of the last 12 months, for the streaks card.
-import type { Counted } from '../../compute.ts';
+import type { CalendarContext } from '../../compute.ts';
 import { formatDay, formatMonth, formatNumber, plural } from '../../text.ts';
 import type { Snapshot } from '../../types.ts';
 
@@ -98,7 +98,7 @@ export interface StreaksData {
   days: StreakDays;
 }
 
-export function streaksData({ snapshot, config, filtering, note }: Counted): StreaksData {
+export function streaksData({ snapshot, config, filtering, note }: CalendarContext): StreaksData {
   // The last 12 months, like the active days and the weekly rhythm; the calendar can't be filtered.
   if (filtering && config.show.includes('streaks')) {
     note('the count settings cannot filter the contribution calendar, so the streaks card still counts private and organization work');

@@ -9,7 +9,7 @@ import { themeFor, type Theme } from './classic.ts';
  * File name -> SVG, one light and one dark variant of each card in `config.show`, in the usual
  * card order. The same names for every style.
  */
-export function renderAll(model: Model, config: Config): Record<string, string> {
+export function renderAll(model: Partial<Model>, config: Config): Record<string, string> {
   const files: Record<string, string> = {};
   const bg = config.look.background;
   const colour = bg.startsWith('#') ? bg : null;
@@ -30,7 +30,11 @@ export function renderAll(model: Model, config: Config): Record<string, string> 
     } else {
       draw = (card) => (card.classic as (data: unknown, theme: Theme, config: Config) => string)(model[card.name], theme, config);
     }
-    for (const card of CARD_DEFS) if (config.show.includes(card.name)) files[`${card.name}-${viewer}.svg`] = draw(card);
+    for (const card of CARD_DEFS) {
+      if (!config.show.includes(card.name)) continue;
+      if (!(card.name in model)) throw new Error(`missing data for the ${card.name} card`);
+      files[`${card.name}-${viewer}.svg`] = draw(card);
+    }
   }
   return files;
 }
