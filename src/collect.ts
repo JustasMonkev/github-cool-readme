@@ -32,6 +32,13 @@ interface ByRepo {
   repository: RawRepo | null;
 }
 
+const CALENDAR_FIELDS = 'weeks { contributionDays { date contributionCount } }';
+type RawCalendar = { weeks: { contributionDays: { date: string; contributionCount: number }[] }[] };
+
+function calendarDays(calendar: RawCalendar): Snapshot['calendar'] {
+  return calendar.weeks.flatMap((w) => w.contributionDays.map((d) => ({ date: d.date, count: d.contributionCount })));
+}
+
 const CONTRIBUTIONS_QUERY = `
 query($login: String!, $from: DateTime!, $to: DateTime!, $calendar: Boolean!) {
   user(login: $login) {
@@ -42,7 +49,7 @@ query($login: String!, $from: DateTime!, $to: DateTime!, $calendar: Boolean!) {
       totalIssueContributions
       restrictedContributionsCount
       contributionCalendar @include(if: $calendar) {
-        weeks { contributionDays { date contributionCount } }
+        ${CALENDAR_FIELDS}
       }
       commitContributionsByRepository(maxRepositories: 100) {
         contributions { totalCount } repository { ${REPO_FIELDS} ${LANGUAGES} }
@@ -68,7 +75,7 @@ interface ContributionsResult {
       totalPullRequestReviewContributions: number;
       totalIssueContributions: number;
       restrictedContributionsCount: number;
-      contributionCalendar?: { weeks: { contributionDays: { date: string; contributionCount: number }[] }[] };
+      contributionCalendar?: RawCalendar;
       commitContributionsByRepository: (ByRepo | null)[];
       pullRequestContributionsByRepository: (ByRepo | null)[];
       pullRequestReviewContributionsByRepository: (ByRepo | null)[];
@@ -106,6 +113,37 @@ async function inParallel<T, R>(items: T[], size: number, fn: (item: T) => Promi
   return inBatches(items, size, (batch) => Promise.all(batch.map(fn)));
 }
 
+async function resolveLogin(client: Client, config: Config, log: (msg: string) => void): Promise<string> {
+  let login = config.user;
+  const { viewer } = await client.query<{ viewer: { login: string } }>('query { viewer { login } }');
+  const scopes = client.scopes();
+  if (scopes && !scopes.includes('read:user') && !scopes.includes('user')) {
+    throw new ScopeError(
+      `the token lacks the "read:user" scope (it has: ${scopes.join(', ') || 'none'}). Without it GitHub hides your ` +
+        'private and organization contributions. Add the scope to the token on GitHub (Settings > Developer settings > ' +
+        'Tokens (classic)); the token value stays the same.',
+    );
+  }
+  login ??= viewer.login;
+  if (login.toLowerCase() !== viewer.login.toLowerCase()) {
+    log(`note: the token belongs to ${viewer.login}, so only ${login}'s public work is visible`);
+  }
+  return login;
+}
+
+export async function collectCalendar(client: Client, config: Config, log: (msg: string) => void): Promise<Snapshot['calendar']> {
+  const { from, to } = last12MonthsRange(new Date());
+  const login = await resolveLogin(client, config, log);
+  const { user } = await client.query<{ user: { contributionsCollection: { contributionCalendar: RawCalendar } } | null }>(
+    `query($login: String!, $from: DateTime!, $to: DateTime!) { user(login: $login) {
+      contributionsCollection(from: $from, to: $to) { contributionCalendar { ${CALENDAR_FIELDS} } } } }`,
+    { login, from: from.toISOString(), to: to.toISOString() },
+  );
+  if (!user) throw new Error(`GitHub user "${login}" not found`);
+  for (const w of client.warnings) log(`warning: ${w}`);
+  return calendarDays(user.contributionsCollection.contributionCalendar);
+}
+
 export async function collect(client: Client, config: Config, log: (msg: string) => void = () => {}): Promise<Snapshot> {
   const now = new Date();
   const repos: Record<string, Repo> = {};
@@ -127,21 +165,7 @@ export async function collect(client: Client, config: Config, log: (msg: string)
     return key;
   };
 
-  // Who.
-  let login = config.user;
-  const { viewer } = await client.query<{ viewer: { login: string } }>('query { viewer { login } }');
-  const scopes = client.scopes();
-  if (scopes && !scopes.includes('read:user') && !scopes.includes('user')) {
-    throw new ScopeError(
-      `the token lacks the "read:user" scope (it has: ${scopes.join(', ') || 'none'}). Without it GitHub hides your ` +
-        'private and organization contributions. Add the scope to the token on GitHub (Settings > Developer settings > ' +
-        'Tokens (classic)); the token value stays the same.',
-    );
-  }
-  login ??= viewer.login;
-  if (login.toLowerCase() !== viewer.login.toLowerCase()) {
-    log(`note: the token belongs to ${viewer.login}, so only ${login}'s public work is visible`);
-  }
+  let login = await resolveLogin(client, config, log);
   const { user } = await client.query<{
     user: { login: string; name: string | null; createdAt: string; organizations: { nodes: { login: string }[] } } | null;
   }>(`query($login: String!) { user(login: $login) { login name createdAt organizations(first: 100) { nodes { login } } } }`, { login });
@@ -186,11 +210,7 @@ export async function collect(client: Client, config: Config, log: (msg: string)
     add(c.pullRequestContributionsByRepository, 'pullRequests');
     add(c.pullRequestReviewContributionsByRepository, 'reviews');
     add(c.issueContributionsByRepository, 'issues');
-    if (c.contributionCalendar) {
-      calendar = c.contributionCalendar.weeks
-        .flatMap((w) => w.contributionDays)
-        .map((d) => ({ date: d.date, count: d.contributionCount }));
-    }
+    if (c.contributionCalendar) calendar = calendarDays(c.contributionCalendar);
     return {
       from: range.from.toISOString(),
       to: range.to.toISOString(),

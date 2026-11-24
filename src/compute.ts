@@ -1,5 +1,7 @@
 // What the cards show, worked out from what was collected from GitHub and the settings. Each card
 // works out its own (its data.ts), from what they share: which repos count, and notes for you.
+import { streaksData } from './cards/streaks/data.ts';
+import { weeklyData } from './cards/weekly/data.ts';
 import { CARD_DEFS, type CardDefs } from './cards/index.ts';
 import type { Config } from './config.ts';
 import { repoKey } from './repos.ts';
@@ -26,6 +28,23 @@ export type Model = { [D in CardDefs as D['name']]: ReturnType<D['data']> } & {
   /** Things the user should know, e.g. config entries that matched nothing. */
   notes: string[];
 };
+
+export type CalendarContext = Pick<Counted, 'config' | 'filtering' | 'note'> & { snapshot: Pick<Snapshot, 'calendar'> };
+export type CalendarModel = Pick<Model, 'notes'> & Partial<Pick<Model, 'weekly' | 'streaks'>>;
+
+export function computeCalendar(calendar: Snapshot['calendar'], config: Config): CalendarModel {
+  const notes: string[] = [];
+  const context: CalendarContext = {
+    snapshot: { calendar },
+    config,
+    filtering: !config.count.private || !config.count.orgs,
+    note: (text) => notes.push(text),
+  };
+  const model: CalendarModel = { notes };
+  if (config.show.includes('weekly')) model.weekly = weeklyData(context);
+  if (config.show.includes('streaks')) model.streaks = streaksData(context);
+  return model;
+}
 
 export function compute(snapshot: Snapshot, config: Config): Model {
   const notes: string[] = [];
